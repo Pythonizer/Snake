@@ -7,14 +7,15 @@ import subprocess
 from GameMenu import GameMenu
 
 
-class StartMenu(GameMenu):
+class GameOverMenu(GameMenu):
 
-    TITLE = "START MENU"
+    TITLE = "GAME OVER"
 
-    def __init__(self, screen, items):
-        super(StartMenu, self).__init__(screen, items)
+    def __init__(self, screen, items, font_color=(255, 0, 0)):
+        super(GameOverMenu, self).__init__(screen, items, font_color=font_color)
 
     def run(self):
+        quit = True
         self.menu_loop = True
         while self.menu_loop:
             self.clock.tick(self.FPS)
@@ -26,12 +27,11 @@ class StartMenu(GameMenu):
                     if event.key == locals.K_q or event.key == locals.K_ESCAPE:
                         sys.exit()
                     elif event.key == locals.K_1:
-                        # Start game
                         self.menu_loop = False
+                        quit = False
                     elif event.key == locals.K_2:
-                        # Select something else
-                        print 'Settings'
-                        pass
+                        quit = True
+                        self.menu_loop = False
 
             # Redraw the background
             self.screen.fill(self.bg_color)
@@ -42,3 +42,5 @@ class StartMenu(GameMenu):
                 self.screen.blit(label, (posx, posy))
 
             pygame.display.flip()
+        print "Quit: %s" % quit
+        return quit

@@ -2,12 +2,12 @@ import pygame
 
 from Head import Head
 from Tail import Tail
-
+import Colors
 
 #class Snake(pygame.sprite.Group):
 
 class Snake(object):
-    def __init__(self, pos_x, pos_y, color=(89, 152, 47), size=30):
+    def __init__(self, pos_x, pos_y, color=Colors.GRASS_GREEN, size=30):
         super(Snake, self).__init__()
         self._color = color
         self._size = size
@@ -25,7 +25,7 @@ class Snake(object):
         return self._color
 
     def get_position(self):
-        return (self._position_x, self._position_y)
+        return self._position_x, self._position_y
 
     def update_move_direction(self, direction):
         self._move_direction = direction

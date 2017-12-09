@@ -3,11 +3,13 @@
 import pygame
 from pygame import locals
 
-from GameMenu import GameMenu
+from GameOverMenu import GameOverMenu
 from StartMenu import StartMenu
+from Snake import Snake
+from FoodDispatcher import FoodDispatcher
+import Colors
 import sys
 from datetime import datetime
-from Snake import Snake
 
 HELP_CONTENT = 'HELP-MENU\n' \
                '----------\n' \
@@ -18,9 +20,10 @@ FPS = 30
 WINDOW_SIZE = 700, 700
 FULLSCREEN = False
 START_MENU_OPTIONS = ['1. Start Game', '2. Settings']
+GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. Quit']
 MOVEMENT = None
 MOVE_STEP = 10
-BLACK = 0, 0, 0
+BACKGORUND = Colors.BLACK
 GAMEOVER = False
 
 if __name__ == '__main__':
@@ -28,10 +31,12 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(WINDOW_SIZE)
 
-    start_meun = StartMenu(screen, START_MENU_OPTIONS)
-    start_meun.run()
+    start_menu = StartMenu(screen, START_MENU_OPTIONS)
+    start_menu.run()
+    game_over_menu = GameOverMenu(screen, GAME_OVER_MENU_OPTIONS)
 
     snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2)
+    food_dispatcher = FoodDispatcher(screen, (0, 0), WINDOW_SIZE)
 
     while not GAMEOVER:
         clock.tick(FPS)
@@ -73,13 +78,20 @@ if __name__ == '__main__':
                         snake.eat()
 
         # Update snake
-        screen.fill(BLACK)
+        screen.fill(BACKGORUND)
+        food_dispatcher.draw()
         snake.move(MOVE_STEP)
         snake.draw(screen)
+
 
         # Logic
         if snake.get_position()[0] < 0 or snake.get_position()[0] >= WINDOW_SIZE[0] \
                 or snake.get_position()[1] < 0 or snake.get_position()[1] >= WINDOW_SIZE[1]:
-            GAMEOVER = True
+            GAMEOVER = game_over_menu.run()
+            if not GAMEOVER:
+                del(snake)
+                snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2)
+
+            print GAMEOVER
 
         pygame.display.flip()

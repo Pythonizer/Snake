@@ -17,7 +17,7 @@ class GameMenu(object):
         self.scr_width = self.screen.get_rect().width
         self.scr_height = self.screen.get_rect().height
 
-        self.menu_loop = True
+        self.menu_loop = None
 
         self.bg_color = bg_color
 
