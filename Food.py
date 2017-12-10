@@ -1,15 +1,21 @@
 import pygame
-from Settings import APPLE_IMG, BLOCKSIZE
+from Settings import APPLE_IMG, BANANA_IMG, BLOCKSIZE
+import random
 
 
-class Fruit(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super(Fruit, self).__init__()
+class Food(pygame.sprite.Sprite):
+    def __init__(self, food_type, pos_x, pos_y):
+        super(Food, self).__init__()
 
         #self.image = pygame.Surface([width, height])
         #self.image.fill(color)
+        food = {'apple': APPLE_IMG,
+                'banana': BANANA_IMG}
+        if food_type == 'random':
+            randx = random.randrange(0, len(food.keys()))
+            food_type = food.keys()[randx]
 
-        self.img = pygame.image.load(APPLE_IMG)
+        self.img = pygame.image.load(food[food_type])
 
         #self.rect = self.image.get_rect()
         self._pos_x = pos_x

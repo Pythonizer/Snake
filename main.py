@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 
 from Settings import FPS, WINDOW_SIZE, FULLSCREEN, START_MENU_OPTIONS, GAME_OVER_MENU_OPTIONS, MOVE_STEP
-from Settings import BACKGORUND, GAMEOVER, BLOCKSIZE, HELP_CONTENT
+from Settings import BACKGORUND, GAMEOVER, BLOCKSIZE, HELP_CONTENT, BACKGROUND_IMG, BORDER_SIZE
 
 QUIT = False
 
@@ -21,12 +21,15 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(WINDOW_SIZE)
 
+    background_image = pygame.image.load(BACKGROUND_IMG)
+
     start_menu = StartMenu(screen, START_MENU_OPTIONS)
     start_menu.run()
     game_over_menu = GameOverMenu(screen, GAME_OVER_MENU_OPTIONS)
 
     snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2, size=BLOCKSIZE)
-    food_dispatcher = FoodDispatcher(screen, (0, 0), WINDOW_SIZE)
+    food_dispatcher = FoodDispatcher(screen, (BORDER_SIZE, BORDER_SIZE),
+                                     (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE))
 
     while not QUIT:
         clock.tick(FPS)
@@ -73,6 +76,7 @@ if __name__ == '__main__':
 
         # Update snake
         screen.fill(BACKGORUND)
+        screen.blit(background_image, (0, 0))
         food_dispatcher.draw()
         snake.move(MOVE_STEP)
         snake.draw(screen)
@@ -85,8 +89,8 @@ if __name__ == '__main__':
         head_size = snake.get_head_size()
 
         # Logic
-        if snake.get_head_position()[0] < 0 or snake.get_head_position()[0] >= WINDOW_SIZE[0]-BLOCKSIZE \
-                or snake.get_head_position()[1] < 0 or snake.get_head_position()[1] >= WINDOW_SIZE[1]-BLOCKSIZE:
+        if snake.get_head_position()[0] < BORDER_SIZE or snake.get_head_position()[0] > WINDOW_SIZE[0]-BLOCKSIZE-BORDER_SIZE \
+                or snake.get_head_position()[1] < BLOCKSIZE or snake.get_head_position()[1] > WINDOW_SIZE[1]-BLOCKSIZE-BLOCKSIZE:
             GAMEOVER = True
         for tail_segment_pos in snake.get_tail_positions():
             if snake.get_head_position()[0] == tail_segment_pos[0] and snake.get_head_position()[1] == tail_segment_pos[1]:
@@ -108,6 +112,7 @@ if __name__ == '__main__':
             print "Eat that shit"
             #food_dispatcher.remove_food()
             snake.eat()
+            food_dispatcher.remove_food()
             food_dispatcher.place_food()
 
         pygame.display.flip()

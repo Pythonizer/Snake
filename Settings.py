@@ -7,6 +7,7 @@ HELP_CONTENT = 'HELP-MENU\n' \
                ''
 FPS = 10
 WINDOW_SIZE = 700, 700
+BORDER_SIZE = 50
 FULLSCREEN = False
 START_MENU_OPTIONS = ['1. Start Game', '2. Settings']
 GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. Quit']
@@ -20,5 +21,7 @@ SNAKE_TAIL_IMG = ASSETS + 'Snake_Tail.png'
 SNAKE_TAIL_BEND_IMG = ASSETS + 'Snake_TailBend.png'
 SNAKE_TAIL_END_IMG = ASSETS + 'Snake_TailEnd.png'
 APPLE_IMG = ASSETS + 'Apple.png'
+BANANA_IMG = ASSETS + 'Banana.png'
+BACKGROUND_IMG = ASSETS + 'Background.png'
 FONT_1 = 'fonts/kongtext.ttf'
 

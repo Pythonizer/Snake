@@ -1,7 +1,7 @@
 import pygame
 import random
-from Apple import Apple
 from Settings import MOVE_STEP
+from Food import Food
 
 
 class FoodDispatcher(object):
@@ -20,11 +20,11 @@ class FoodDispatcher(object):
 
     def place_food(self):
         if not self._food:
-            self._food = Apple(0, 0)
+            self._food = Food('random', 0, 0)
         # Round coordinates to keep it aligned to the snakes movement
-        x = random.randrange(self._min_x, self._max_x - self._food.get_size())
+        x = random.randrange(self._min_x + self._food.get_size(), self._max_x - self._food.get_size())
         rounded_x = round(x/MOVE_STEP)*MOVE_STEP
-        y = random.randrange(self._min_y, self._max_y - self._food.get_size())
+        y = random.randrange(self._min_y + self._food.get_size(), self._max_y - self._food.get_size())
         rounded_y = round(y/MOVE_STEP)*MOVE_STEP
         self._food.update_x_position(rounded_x)
         self._food.update_y_position(rounded_y)
