@@ -91,7 +91,6 @@ if __name__ == '__main__':
         for tail_segment_pos in snake.get_tail_positions():
             if snake.get_head_position()[0] == tail_segment_pos[0] and snake.get_head_position()[1] == tail_segment_pos[1]:
                 GAMEOVER = True
-                print 'safsaf'
 
         if GAMEOVER:
             QUIT = game_over_menu.run()
