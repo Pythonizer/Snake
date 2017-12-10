@@ -5,8 +5,6 @@ from Tail import Tail
 import Colors
 from Settings import MOVE_STEP
 
-#class Snake(pygame.sprite.Group):
-
 
 class Snake(object):
     def __init__(self, pos_x, pos_y, size, color=Colors.GRASS_GREEN):
@@ -18,11 +16,7 @@ class Snake(object):
         self._position_y = pos_y
         self._move_direction = None
 
-        self._head = Head(color=self._color, width=self._size, height=self._size, pos_x=self._position_x,
-                          pos_y=self._position_y)
-        #self._tails = pygame.sprite.Group()
-        #self._group.add(self._head)
-        #self._tail = Tail(Colors.GRASS_GREEN, self._size, self._size)
+        self._head = Head(pos_x=self._position_x, pos_y=self._position_y)
         self._tail = Tail()
         self._length = 0
 

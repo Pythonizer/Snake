@@ -19,5 +19,6 @@ SNAKE_HEAD_IMG = ASSETS + 'Snake_Head.png'
 SNAKE_TAIL_IMG = ASSETS + 'Snake_Tail.png'
 SNAKE_TAIL_BEND_IMG = ASSETS + 'Snake_TailBend.png'
 SNAKE_TAIL_END_IMG = ASSETS + 'Snake_TailEnd.png'
+APPLE_IMG = ASSETS + 'Apple.png'
 FONT_1 = 'fonts/kongtext.ttf'
 
