@@ -11,20 +11,10 @@ import Colors
 import sys
 from datetime import datetime
 
-HELP_CONTENT = 'HELP-MENU\n' \
-               '----------\n' \
-               'Shortcuts:\n' \
-               '<space>: make screen-shot'\
-               ''
-FPS = 30
-WINDOW_SIZE = 700, 700
-FULLSCREEN = False
-START_MENU_OPTIONS = ['1. Start Game', '2. Settings']
-GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. Quit']
-MOVEMENT = None
-MOVE_STEP = 10
-BACKGORUND = Colors.BLACK
-GAMEOVER = False
+from Settings import FPS, WINDOW_SIZE, FULLSCREEN, START_MENU_OPTIONS, GAME_OVER_MENU_OPTIONS, MOVE_STEP
+from Settings import BACKGORUND, GAMEOVER, BLOCKSIZE, HELP_CONTENT
+
+QUIT = False
 
 if __name__ == '__main__':
     pygame.init()
@@ -35,10 +25,10 @@ if __name__ == '__main__':
     start_menu.run()
     game_over_menu = GameOverMenu(screen, GAME_OVER_MENU_OPTIONS)
 
-    snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2)
+    snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2, size=BLOCKSIZE)
     food_dispatcher = FoodDispatcher(screen, (0, 0), WINDOW_SIZE)
 
-    while not GAMEOVER:
+    while not QUIT:
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -76,6 +66,10 @@ if __name__ == '__main__':
                     #todo tryout
                     elif event.key == pygame.K_1:
                         snake.eat()
+                    elif event.key == pygame.K_2:
+                        #food_dispatcher.remove_food()
+                        food_dispatcher.place_food()
+
 
         # Update snake
         screen.fill(BACKGORUND)
@@ -83,15 +77,38 @@ if __name__ == '__main__':
         snake.move(MOVE_STEP)
         snake.draw(screen)
 
+        food_pos_x = food_dispatcher.get_food_position()[0]
+        food_pos_y = food_dispatcher.get_food_position()[1]
+        food_size = food_dispatcher.get_food_size()
+        head_pos_x = snake.get_head_position()[0]
+        head_pos_y = snake.get_head_position()[1]
+        head_size = snake.get_head_size()
 
         # Logic
-        if snake.get_position()[0] < 0 or snake.get_position()[0] >= WINDOW_SIZE[0] \
-                or snake.get_position()[1] < 0 or snake.get_position()[1] >= WINDOW_SIZE[1]:
-            GAMEOVER = game_over_menu.run()
-            if not GAMEOVER:
-                del(snake)
-                snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2)
+        if snake.get_head_position()[0] < 0 or snake.get_head_position()[0] >= WINDOW_SIZE[0]-BLOCKSIZE \
+                or snake.get_head_position()[1] < 0 or snake.get_head_position()[1] >= WINDOW_SIZE[1]-BLOCKSIZE:
+            GAMEOVER = True
+        for tail_segment_pos in snake.get_tail_positions():
+            if snake.get_head_position()[0] == tail_segment_pos[0] and snake.get_head_position()[1] == tail_segment_pos[1]:
+                GAMEOVER = True
+                print 'safsaf'
 
-            print GAMEOVER
+        if GAMEOVER:
+            QUIT = game_over_menu.run()
+            if not QUIT:
+                del(snake)
+                snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
+                GAMEOVER = False
+
+        elif snake.get_head_position()[0] == food_dispatcher.get_food_position()[0]\
+                and snake.get_head_position()[1] == food_dispatcher.get_food_position()[1]:
+            pass
+
+        elif food_pos_x <= head_pos_x <= food_pos_x+food_size and food_pos_y <= head_pos_y <= food_pos_y+food_size\
+                or food_pos_x <= head_pos_x+head_size <= food_pos_x+food_size and food_pos_y <= head_pos_y+head_size <= food_pos_y+food_size:
+            print "Eat that shit"
+            #food_dispatcher.remove_food()
+            snake.eat()
+            food_dispatcher.place_food()
 
         pygame.display.flip()

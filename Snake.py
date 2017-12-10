@@ -6,8 +6,9 @@ import Colors
 
 #class Snake(pygame.sprite.Group):
 
+
 class Snake(object):
-    def __init__(self, pos_x, pos_y, color=Colors.GRASS_GREEN, size=30):
+    def __init__(self, pos_x, pos_y, size, color=Colors.GRASS_GREEN):
         super(Snake, self).__init__()
         self._color = color
         self._size = size
@@ -18,14 +19,26 @@ class Snake(object):
 
         self._head = Head(color=self._color, width=self._size, height=self._size, pos_x=self._position_x,
                           pos_y=self._position_y)
-        self._tails = pygame.sprite.Group()
+        #self._tails = pygame.sprite.Group()
         #self._group.add(self._head)
+        self._tail = Tail(Colors.GRASS_GREEN, self._size, self._size)
+        self._length = 0
 
     def get_color(self):
         return self._color
 
-    def get_position(self):
+    def get_head_size(self):
+        return self._size
+
+    def get_head_position(self):
         return self._position_x, self._position_y
+
+    def get_tail_positions(self):
+        positions = []
+        for t in self._tail:
+            positions.append((t[0], t[1]))
+        print "Tail pos: %s" % positions
+        return positions
 
     def update_move_direction(self, direction):
         self._move_direction = direction
@@ -34,6 +47,7 @@ class Snake(object):
         return self._move_direction
 
     def move(self, step):
+        self._update_tail()
         if self._move_direction == 'up':
             self._position_y -= step
             self._head.update_y_position(self._position_y)
@@ -49,14 +63,15 @@ class Snake(object):
 
     def draw(self, screen):
         pygame.draw.rect(screen, self._color, self._head.rect)
-        self._tails.draw(screen)
+        self._tail.draw(screen)
 
     def eat(self):
-        self._add_tail()
+        self._length += 1
 
-    def _add_tail(self):
-        print self._tails
-        for element in self._tails:
-            print element
-        self._tails.add(Tail((100,100,100), self._size, self._size, pos_x=(self._head.get_pos_x()),
-                             pos_y=self._head.get_pos_y()))
+    def _update_tail(self):
+        print self._tail
+        # Adding the actual position of the snakes head and removing the oldest tail element, if needed.
+        self._tail.add_tail_segment(self._position_x, self._position_y)
+        if self._length < len(self._tail):
+            del self._tail[0]
+

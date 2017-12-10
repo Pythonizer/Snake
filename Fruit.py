@@ -16,6 +16,9 @@ class Fruit(pygame.sprite.Sprite):
         self.rect[0] = pos_x
         self.rect[1] = pos_y
 
+    def draw(self, screen):
+        pygame.draw.rect(screen, self._color, self.rect)
+
     def update_x_position(self, pos):
         self.rect[0] = pos
 
@@ -30,3 +33,6 @@ class Fruit(pygame.sprite.Sprite):
 
     def get_size(self):
         return self._height
+
+    def get_color(self):
+        return self._color
