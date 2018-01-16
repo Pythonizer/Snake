@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2, size=BLOCKSIZE)
     food_dispatcher = FoodDispatcher(screen, (BORDER_SIZE, BORDER_SIZE),
-                                     (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE))
+                                     (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE), snake)
 
     while not QUIT:
         clock.tick(FPS)
