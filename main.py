@@ -7,6 +7,7 @@ from GameOverMenu import GameOverMenu
 from StartMenu import StartMenu
 from Snake import Snake
 from FoodDispatcher import FoodDispatcher
+from AI import AI
 import Colors
 import sys
 from datetime import datetime
@@ -24,12 +25,14 @@ if __name__ == '__main__':
     background_image = pygame.image.load(BACKGROUND_IMG)
 
     start_menu = StartMenu(screen, START_MENU_OPTIONS)
-    start_menu.run()
+    game_mode = start_menu.run()
     game_over_menu = GameOverMenu(screen, GAME_OVER_MENU_OPTIONS)
 
     snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2, size=BLOCKSIZE)
     food_dispatcher = FoodDispatcher(screen, (BORDER_SIZE, BORDER_SIZE),
                                      (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE), snake)
+
+    ai = AI(snake, food_dispatcher)
 
     while not QUIT:
         clock.tick(FPS)
@@ -53,18 +56,6 @@ if __name__ == '__main__':
                     elif event.key == locals.K_SPACE:
                         pygame.image.save(screen, 'screenshots/screenshot_%s.png' % str(datetime.now()))
 
-                    elif event.key == pygame.K_LEFT and snake.get_move_direction() != 'right':
-                        print "left"
-                        snake.update_move_direction('left')
-                    elif event.key == pygame.K_RIGHT and snake.get_move_direction() != 'left':
-                        print "right"
-                        snake.update_move_direction('right')
-                    elif event.key == pygame.K_UP and snake.get_move_direction() != 'down':
-                        print "up"
-                        snake.update_move_direction('up')
-                    elif event.key == pygame.K_DOWN and snake.get_move_direction() != 'up':
-                        print "down"
-                        snake.update_move_direction('down')
 
                     #todo tryout
                     elif event.key == pygame.K_1:
@@ -72,6 +63,26 @@ if __name__ == '__main__':
                     elif event.key == pygame.K_2:
                         #food_dispatcher.remove_food()
                         food_dispatcher.place_food()
+
+                    if game_mode == 'player':
+                        if event.key == pygame.K_LEFT and snake.get_move_direction() != 'right':
+                            print "left"
+                            snake.update_move_direction('left')
+                        elif event.key == pygame.K_RIGHT and snake.get_move_direction() != 'left':
+                            print "right"
+                            snake.update_move_direction('right')
+                        elif event.key == pygame.K_UP and snake.get_move_direction() != 'down':
+                            print "up"
+                            snake.update_move_direction('up')
+                        elif event.key == pygame.K_DOWN and snake.get_move_direction() != 'up':
+                            print "down"
+                            snake.update_move_direction('down')
+        if game_mode == 'ai':
+            #ai.tryout()
+            #ai.tryout_wall()
+            ai.simple_walk()
+
+
 
 
         # Update snake

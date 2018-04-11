@@ -16,6 +16,7 @@ class StartMenu(GameMenu):
 
     def run(self):
         self.menu_loop = True
+        game_mode = 'player'
         while self.menu_loop:
             self.clock.tick(self.FPS)
 
@@ -29,6 +30,12 @@ class StartMenu(GameMenu):
                         # Start game
                         self.menu_loop = False
                     elif event.key == locals.K_2:
+                        # Start in AI mode
+                        print 'AI'
+                        self.menu_loop = False
+                        game_mode = 'ai'
+                        pass
+                    elif event.key == locals.K_3:
                         # Select something else
                         print 'Settings'
                         pass
@@ -42,3 +49,5 @@ class StartMenu(GameMenu):
                 self.screen.blit(label, (posx, posy))
 
             pygame.display.flip()
+        print 'left start menu loop'
+        return game_mode

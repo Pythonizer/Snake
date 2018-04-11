@@ -27,7 +27,7 @@ class GameMenu(object):
         self.font_color = font_color
 
         # Prepare title
-        print self.TITLE
+        #print self.TITLE
         self._title_font = pygame.font.Font(FONT_1, font_size*2)
         self._title_color = self.font_color
         self._title = self._title_font.render(self.TITLE, 1, self._title_color)
