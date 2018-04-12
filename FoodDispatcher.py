@@ -1,6 +1,6 @@
 import pygame
 import random
-from Settings import MOVE_STEP, BLOCKSIZE
+from Settings import MOVE_STEP, BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
 from Food import Food
 
 
@@ -20,29 +20,35 @@ class FoodDispatcher(object):
         self.remove_food()
         self.place_food()
 
-    def place_food(self):
+    # TODO use map/ lambda etc for this
+    def _get_play_ground(self):
+        play_ground = []
+        for i in range(BORDER_SIZE, WINDOW_SIZE[0]-BORDER_SIZE, BLOCKSIZE):
+            for j in range(BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE, BLOCKSIZE):
+                play_ground.append((i, j))
+        return play_ground
+
+    def _get_free_placing_space(self):
         snake_positions = self.snake.get_tail_positions()
         snake_positions.append(self.snake.get_head_position())
+
+        playground = self._get_play_ground()
+        for snake_pos in snake_positions:
+            playground.remove(snake_pos)
+
+        return playground
+
+    def place_food(self):
+        free_space = self._get_free_placing_space()
         if not self._food:
             self._food = Food('random', 0, 0)
+        # ValueError: empty range for randrange() (0,0, 0)
+        rand_pos = free_space[random.randint(0, len(free_space)-1)]
+        self._food.update_x_position(rand_pos[0])
+        self._food.update_y_position(rand_pos[1])
 
-        repeat = True
-        while repeat:
-            # Round coordinates to keep it aligned to the snakes movement
-            x = random.randrange(self._min_x + self._food.get_size(), self._max_x - self._food.get_size())
-            rounded_x = round(x / MOVE_STEP) * MOVE_STEP - self._food.get_size()/2
-            y = random.randrange(self._min_y + self._food.get_size(), self._max_y - self._food.get_size())
-            rounded_y = round(y / MOVE_STEP) * MOVE_STEP - self._food.get_size()/2
-
-            for p in snake_positions:
-                if pygame.Rect(p[0], p[1], BLOCKSIZE, BLOCKSIZE).colliderect(pygame.Rect(rounded_x, rounded_y, BLOCKSIZE, BLOCKSIZE)):
-                    repeat = True
-                    break
-            else:
-                repeat = False
-
-        self._food.update_x_position(rounded_x)
-        self._food.update_y_position(rounded_y)
+        #print self.snake.get_head_position()
+        #print rand_pos
 
     def remove_food(self):
         self._food = None

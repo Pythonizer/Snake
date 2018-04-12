@@ -6,7 +6,7 @@ HELP_CONTENT = 'HELP-MENU\n' \
                '<space>: make screen-shot'\
                ''
 #FPS = 10
-FPS = 40
+FPS = 50
 WINDOW_SIZE = 700, 700
 BORDER_SIZE = 50
 FULLSCREEN = False

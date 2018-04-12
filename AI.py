@@ -88,14 +88,10 @@ class AI(object):
                 return
 
         if self._left_wall():
-            print "LLL"
             if self._snake.get_move_direction() == 'down':
-                pass
-                print "DDD"
                 if self._lower_wall():
                     self._last_move_direction = 'down'
                     self._snake.update_move_direction('right')
-                    print "RRRRRRRRRRRRRR"
                     return
             elif self._snake.get_move_direction() == 'right':
                 self._last_move_direction = 'right'
@@ -103,9 +99,7 @@ class AI(object):
                 return
 
         if self._lower_wall_with_space():
-            print "LS"
             if self._snake.get_move_direction() == 'down':
-                print "***LSD***"
                 if not self._left_wall():
                     self._last_move_direction = 'down'
                     self._snake.update_move_direction('left')

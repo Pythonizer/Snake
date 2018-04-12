@@ -99,12 +99,16 @@ if __name__ == '__main__':
         head_pos_y = snake.get_head_position()[1]
         head_size = snake.get_head_size()
 
-        # Logic
-        if snake.get_head_position()[0] < BORDER_SIZE or snake.get_head_position()[0] > WINDOW_SIZE[0]-BLOCKSIZE-BORDER_SIZE \
-                or snake.get_head_position()[1] < BLOCKSIZE or snake.get_head_position()[1] > WINDOW_SIZE[1]-BLOCKSIZE-BLOCKSIZE:
+        #print food_pos_x, food_pos_y
+        #print head_pos_x, head_pos_x
+        #print ''
+
+        # ******** Logic ********
+        if head_pos_x < BORDER_SIZE or head_pos_x > WINDOW_SIZE[0]-BLOCKSIZE-BORDER_SIZE \
+                or head_pos_y < BLOCKSIZE or head_pos_y > WINDOW_SIZE[1]-BLOCKSIZE-BLOCKSIZE:
             GAMEOVER = True
         for tail_segment_pos in snake.get_tail_positions():
-            if snake.get_head_position()[0] == tail_segment_pos[0] and snake.get_head_position()[1] == tail_segment_pos[1]:
+            if head_pos_x == tail_segment_pos[0] and head_pos_y == tail_segment_pos[1]:
                 GAMEOVER = True
 
         if GAMEOVER:
@@ -114,12 +118,7 @@ if __name__ == '__main__':
                 snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
                 GAMEOVER = False
 
-        elif snake.get_head_position()[0] == food_dispatcher.get_food_position()[0]\
-                and snake.get_head_position()[1] == food_dispatcher.get_food_position()[1]:
-            pass
-
-        elif food_pos_x <= head_pos_x <= food_pos_x+food_size and food_pos_y <= head_pos_y <= food_pos_y+food_size\
-                or food_pos_x <= head_pos_x+head_size <= food_pos_x+food_size and food_pos_y <= head_pos_y+head_size <= food_pos_y+food_size:
+        elif food_pos_x == head_pos_x and food_pos_y == head_pos_y:
             print "Eat that shit"
             #food_dispatcher.remove_food()
             snake.eat()
