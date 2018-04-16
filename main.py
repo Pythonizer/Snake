@@ -8,9 +8,13 @@ from StartMenu import StartMenu
 from Snake import Snake
 from FoodDispatcher import FoodDispatcher
 from AI import AI
+from GameField import GameField
 import Colors
 import sys
 from datetime import datetime
+from pprint import pprint
+
+import math
 
 from Settings import FPS, WINDOW_SIZE, FULLSCREEN, START_MENU_OPTIONS, GAME_OVER_MENU_OPTIONS, MOVE_STEP
 from Settings import BACKGORUND, GAMEOVER, BLOCKSIZE, HELP_CONTENT, BACKGROUND_IMG, BORDER_SIZE
@@ -29,10 +33,12 @@ if __name__ == '__main__':
     game_over_menu = GameOverMenu(screen, GAME_OVER_MENU_OPTIONS)
 
     snake = Snake(WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2, size=BLOCKSIZE)
-    food_dispatcher = FoodDispatcher(screen, (BORDER_SIZE, BORDER_SIZE),
-                                     (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE), snake)
 
-    ai = AI(snake, food_dispatcher)
+    gameField = GameField(snake)
+    foodDispatcher = FoodDispatcher(screen, (BORDER_SIZE, BORDER_SIZE),
+                                    (WINDOW_SIZE[0]-BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE), snake, gameField)
+
+    ai = AI(snake, foodDispatcher, gameField)
 
     while not QUIT:
         clock.tick(FPS)
@@ -62,7 +68,10 @@ if __name__ == '__main__':
                         snake.eat()
                     elif event.key == pygame.K_2:
                         #food_dispatcher.remove_food()
-                        food_dispatcher.place_food()
+                        foodDispatcher.place_food()
+                    elif event.key == pygame.K_3:
+                        print ai.searcher.get_relative_head_to_fruit_distance()
+                        print ai.searcher.get_relative_point_to_fruit_distance((0, 0))
 
                     if game_mode == 'player':
                         if event.key == pygame.K_LEFT and snake.get_move_direction() != 'right':
@@ -81,6 +90,7 @@ if __name__ == '__main__':
             #ai.tryout()
             #ai.tryout_wall()
             ai.simple_walk()
+            #ai.greedy_walk()
 
 
 
@@ -88,13 +98,13 @@ if __name__ == '__main__':
         # Update snake
         screen.fill(BACKGORUND)
         screen.blit(background_image, (0, 0))
-        food_dispatcher.draw()
+        foodDispatcher.draw()
         snake.move(MOVE_STEP)
         snake.draw(screen)
 
-        food_pos_x = food_dispatcher.get_food_position()[0]
-        food_pos_y = food_dispatcher.get_food_position()[1]
-        food_size = food_dispatcher.get_food_size()
+        food_pos_x = foodDispatcher.get_food_position()[0]
+        food_pos_y = foodDispatcher.get_food_position()[1]
+        food_size = foodDispatcher.get_food_size()
         head_pos_x = snake.get_head_position()[0]
         head_pos_y = snake.get_head_position()[1]
         head_size = snake.get_head_size()
@@ -122,7 +132,7 @@ if __name__ == '__main__':
             print "Eat that shit"
             #food_dispatcher.remove_food()
             snake.eat()
-            food_dispatcher.remove_food()
-            food_dispatcher.place_food()
+            foodDispatcher.remove_food()
+            foodDispatcher.place_food()
 
         pygame.display.flip()

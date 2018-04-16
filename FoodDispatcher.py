@@ -5,7 +5,7 @@ from Food import Food
 
 
 class FoodDispatcher(object):
-    def __init__(self, screen, min_range, max_range, snake):  # todo: handle snake connection differently
+    def __init__(self, screen, min_range, max_range, snake, gameField):  # todo: handle snake connection differently
         self._screen = screen
         self._min_x = min_range[0]
         self._min_y = min_range[1]
@@ -13,6 +13,7 @@ class FoodDispatcher(object):
         self._max_y = max_range[1]
 
         self.snake = snake
+        self.gameField = gameField
 
         self._food = None
 
@@ -20,32 +21,18 @@ class FoodDispatcher(object):
         self.remove_food()
         self.place_food()
 
-    # TODO use map/ lambda etc for this
-    def _get_play_ground(self):
-        play_ground = []
-        for i in range(BORDER_SIZE, WINDOW_SIZE[0]-BORDER_SIZE, BLOCKSIZE):
-            for j in range(BORDER_SIZE, WINDOW_SIZE[1]-BORDER_SIZE, BLOCKSIZE):
-                play_ground.append((i, j))
-        return play_ground
-
-    def _get_free_placing_space(self):
-        snake_positions = self.snake.get_tail_positions()
-        snake_positions.append(self.snake.get_head_position())
-
-        playground = self._get_play_ground()
-        for snake_pos in snake_positions:
-            playground.remove(snake_pos)
-
-        return playground
-
     def place_food(self):
-        free_space = self._get_free_placing_space()
+        #free_space = self._get_free_placing_space()
+        free_space = self.gameField.get_free_space()
         if not self._food:
             self._food = Food('random', 0, 0)
         # ValueError: empty range for randrange() (0,0, 0)
         rand_pos = free_space[random.randint(0, len(free_space)-1)]
         self._food.update_x_position(rand_pos[0])
         self._food.update_y_position(rand_pos[1])
+        self._food.update_food_type('random')
+
+        self.gameField.update_food_position(rand_pos)
 
         #print self.snake.get_head_position()
         #print rand_pos

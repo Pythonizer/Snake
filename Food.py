@@ -9,19 +9,24 @@ class Food(pygame.sprite.Sprite):
 
         #self.image = pygame.Surface([width, height])
         #self.image.fill(color)
-        food = {'apple': APPLE_IMG,
-                'banana': BANANA_IMG}
-        if food_type == 'random':
-            randx = random.randrange(0, len(food.keys()))
-            food_type = food.keys()[randx]
+        self._food_types = {'apple': APPLE_IMG,
+                            'banana': BANANA_IMG}
 
-        self.img = pygame.image.load(food[food_type])
+        self.img = None
+        self.update_food_type(food_type)
 
         #self.rect = self.image.get_rect()
         self._pos_x = pos_x
         self._pos_y = pos_y
         #self.rect[0] = pos_x
         #self.rect[1] = pos_y
+
+    def update_food_type(self, food_type):
+        if food_type == 'random':
+            randx = random.randrange(0, len(self._food_types.keys()))
+            food_type = self._food_types.keys()[randx]
+
+        self.img = pygame.image.load(self._food_types[food_type])
 
     def draw(self, screen):
         screen.blit(self.img, (self._pos_x, self._pos_y))

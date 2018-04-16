@@ -30,6 +30,9 @@ class GameOverMenu(GameMenu):
                         self.menu_loop = False
                         quit = False
                     elif event.key == locals.K_2:
+                        quit = False
+                        self.menu_loop = False
+                    elif event.key == locals.K_3:
                         quit = True
                         self.menu_loop = False
 

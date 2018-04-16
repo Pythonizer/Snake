@@ -6,12 +6,12 @@ HELP_CONTENT = 'HELP-MENU\n' \
                '<space>: make screen-shot'\
                ''
 #FPS = 10
-FPS = 50
+FPS = 10
 WINDOW_SIZE = 700, 700
 BORDER_SIZE = 50
 FULLSCREEN = False
 START_MENU_OPTIONS = ['1. Start Game', '2. AI Player', '3. Settings']
-GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. Quit']
+GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. AI Again', '3. Quit']
 MOVE_STEP = 30
 BACKGORUND = Colors.BLACK
 GAMEOVER = False
