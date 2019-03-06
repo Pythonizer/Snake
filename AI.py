@@ -144,38 +144,42 @@ class AI(object):
                 self._snake.update_move_direction('up')
             elif food_pos_y > head_pos_y:
                 self._snake.update_move_direction('down')
+            elif food_pos_y == head_pos_y and food_pos_x < head_pos_x:
+                self._snake.update_move_direction('down')
             else:
                 print('RRR')
                 pass
-                #self.simple_walk()
+
         elif move_dir == "left":
             if food_pos_y < head_pos_y:
                 self._snake.update_move_direction('up')
             elif food_pos_y > head_pos_y:
                 self._snake.update_move_direction('down')
+            elif food_pos_y == head_pos_y and food_pos_x > head_pos_x:
+                self._snake.update_move_direction('down')
             else:
                 print('LLL')
                 pass
-                #self.simple_walk()
+
         elif move_dir == "up":
             if food_pos_x < head_pos_x:
                 self._snake.update_move_direction('left')
             elif food_pos_x > head_pos_x:
                 self._snake.update_move_direction('right')
+            elif food_pos_x == head_pos_x and food_pos_y > head_pos_y:
+                self._snake.update_move_direction('right')
             else:
                 print('UUU')
                 pass
-                #self.simple_walk()
+
         elif move_dir == "down":
             if food_pos_x < head_pos_x:
                 self._snake.update_move_direction('left')
             elif food_pos_x > head_pos_x:
                 self._snake.update_move_direction('right')
+            elif food_pos_x == head_pos_x and food_pos_y < head_pos_y:
+                self._snake.update_move_direction('right')
             else:
                 if food_pos_y < head_pos_y:
                     self._snake.update_move_direction('right')
                 pass
-                #self.simple_walk()
-        #else:
-        #    print "NO OPTION"
-        #    self.simple_walk()

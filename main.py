@@ -76,6 +76,8 @@ if __name__ == '__main__':
                     ai.test()
                 elif event.key == pygame.K_5:
                     ai.test2()
+                elif event.key == pygame.K_6:
+                    print("Snake head: {head_pos}".format(head_pos=snake.get_head_position()))
 
                 if game_mode == 'player':
                     if event.key == pygame.K_LEFT and snake.get_move_direction() != 'right':
@@ -93,8 +95,8 @@ if __name__ == '__main__':
         if game_mode == 'ai':
             #ai.tryout()
             #ai.tryout_wall()
-            ai.simple_walk()
-            #ai.greedy_walk()
+            #ai.simple_walk()
+            ai.greedy_walk()
 
         # Update snake
         screen.fill(BACKGORUND)
@@ -127,6 +129,7 @@ if __name__ == '__main__':
             if not QUIT:
                 del(snake)
                 snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
+                ai = AI(snake, foodDispatcher, gameField)
                 GAMEOVER = False
 
         elif food_pos_x == head_pos_x and food_pos_y == head_pos_y:
