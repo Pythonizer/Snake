@@ -45,5 +45,5 @@ class GameOverMenu(GameMenu):
                 self.screen.blit(label, (posx, posy))
 
             pygame.display.flip()
-        print "Quit: %s" % quit
+        print("Quit: %s" % quit)
         return quit

@@ -24,7 +24,7 @@ class Food(pygame.sprite.Sprite):
     def update_food_type(self, food_type):
         if food_type == 'random':
             randx = random.randrange(0, len(self._food_types.keys()))
-            food_type = self._food_types.keys()[randx]
+            food_type = list(self._food_types.keys())[randx]
 
         self.img = pygame.image.load(self._food_types[food_type])
 

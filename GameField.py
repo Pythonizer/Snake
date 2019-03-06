@@ -2,15 +2,18 @@
 import pygame
 import random
 from Settings import MOVE_STEP, BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
+from BlockHandling import GameFieldBlock
 
 
 class GameField(object):
 
     def __init__(self, snake):
         self._snake = snake
-        #self._foodDispatcher = foodDispatcher
 
         self._food_position = None
+
+    def get_game_field_block_size(self):
+        return (WINDOW_SIZE[0] - (2*BLOCKSIZE)) // BLOCKSIZE, (WINDOW_SIZE[1] - (2*BLOCKSIZE))//BLOCKSIZE
 
     def update_food_position(self, pos):
         self._food_position = pos
@@ -31,43 +34,52 @@ class GameField(object):
 
         playground = self.get_play_ground()
         for snake_pos in snake_positions:
-            playground.remove(snake_pos)
+            try:
+                playground.remove(snake_pos)
+            except ValueError as err:
+                # TODO: why?
+                # ToDo: appears just after "play again"/ first element eaten
+                print("*******")
+                print(str(err))
+                print("SnakePos: %s" % str(snake_pos))
+                print("Playground: %s" % str(playground))
+                print("*******")
 
         return playground
 
-    def get_game_matrix(self):
-        """
-
-        Free space:     0
-        Tail:           1
-        Head:           2
-        Food:           3
-
-
-        :return:
-        """
-        play_ground = self.get_play_ground()
-        #free_space = self.get_free_space()
-        tail_positions = self._snake.get_tail_positions()
-        head_position = self._snake.get_head_position()
-        food_position = self._food_position
-        matrix = []
-        play_ground_index = 0
-        # Todo: use lambda?
-        for y in xrange(0, 20):
-            matrix.append([])
-            for x in xrange(0, 20):
-                if play_ground[play_ground_index] == head_position:
-                    matrix[y].append(2)
-                elif play_ground[play_ground_index] == food_position:
-                    matrix[y].append(3)
-                elif play_ground[play_ground_index] in tail_positions:
-                    matrix[y].append(1)
-                else:
-                    matrix[y].append(0)
-                play_ground_index += 1
-
-        return matrix
+    # def get_game_matrix(self):
+    #     """
+    #
+    #     Free space:     0
+    #     Tail:           1
+    #     Head:           2
+    #     Food:           3
+    #
+    #
+    #     :return:
+    #     """
+    #     play_ground = self.get_play_ground()
+    #     #free_space = self.get_free_space()
+    #     tail_positions = self._snake.get_tail_positions()
+    #     head_position = self._snake.get_head_position()
+    #     food_position = self._food_position
+    #     matrix = []
+    #     play_ground_index = 0
+    #     # Todo: use lambda?
+    #     for y in xrange(0, 20):
+    #         matrix.append([])
+    #         for x in xrange(0, 20):
+    #             if play_ground[play_ground_index] == head_position:
+    #                 matrix[y].append(2)
+    #             elif play_ground[play_ground_index] == food_position:
+    #                 matrix[y].append(3)
+    #             elif play_ground[play_ground_index] in tail_positions:
+    #                 matrix[y].append(1)
+    #             else:
+    #                 matrix[y].append(0)
+    #             play_ground_index += 1
+    #
+    #     return matrix
 
     def map_pixels_to_coordinates(self, pixels):
         """
@@ -80,4 +92,7 @@ class GameField(object):
         :return:
         """
         return ((pixels[0] / BLOCKSIZE) - 1, (pixels[1] / BLOCKSIZE) - 1)
+
+    def map_coordinates_to_pixles(self, coordinates):
+        return ((coordinates[0] + 1) * BLOCKSIZE, (coordinates[1] + 1) * BLOCKSIZE)
 

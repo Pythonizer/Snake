@@ -8,10 +8,20 @@ class AI(object):
     def __init__(self, snake, food_dispatcher, gameField):
         self._snake = snake
         self._foodDispatcher = food_dispatcher
-        #self._gameField = gameField
+        self._gameField = gameField
         self._last_move_direction = None
 
         self.searcher = Searcher(gameField, snake, food_dispatcher)
+
+    def test2(self):
+        self.searcher.test()
+
+    def test(self):
+        #print self.searcher.get_neighbor_coordinates((0, 0))
+        #print self.searcher.get_neighbor_coordinates((19, 19))
+        #print self.searcher.get_neighbor_coordinates((5, 10))
+        neighbors = self.searcher.get_neighbor_coordinates(self._gameField.map_pixels_to_coordinates(self._snake.get_head_position()))
+        print(self.searcher.get_valid_neighbors(neighbors))
 
     def _right_wall(self):
         return self._snake.get_head_position()[0] >= WINDOW_SIZE[0] - BLOCKSIZE - BORDER_SIZE
@@ -135,7 +145,7 @@ class AI(object):
             elif food_pos_y > head_pos_y:
                 self._snake.update_move_direction('down')
             else:
-                print 'RRR'
+                print('RRR')
                 pass
                 #self.simple_walk()
         elif move_dir == "left":
@@ -144,7 +154,7 @@ class AI(object):
             elif food_pos_y > head_pos_y:
                 self._snake.update_move_direction('down')
             else:
-                print 'LLL'
+                print('LLL')
                 pass
                 #self.simple_walk()
         elif move_dir == "up":
@@ -153,7 +163,7 @@ class AI(object):
             elif food_pos_x > head_pos_x:
                 self._snake.update_move_direction('right')
             else:
-                print 'UUU'
+                print('UUU')
                 pass
                 #self.simple_walk()
         elif move_dir == "down":

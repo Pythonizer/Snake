@@ -31,13 +31,13 @@ class StartMenu(GameMenu):
                         self.menu_loop = False
                     elif event.key == locals.K_2:
                         # Start in AI mode
-                        print 'AI'
+                        print('AI')
                         self.menu_loop = False
                         game_mode = 'ai'
                         pass
                     elif event.key == locals.K_3:
                         # Select something else
-                        print 'Settings'
+                        print('Settings')
                         pass
 
             # Redraw the background
@@ -49,5 +49,5 @@ class StartMenu(GameMenu):
                 self.screen.blit(label, (posx, posy))
 
             pygame.display.flip()
-        print 'left start menu loop'
+        print('left start menu loop')
         return game_mode

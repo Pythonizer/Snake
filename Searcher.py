@@ -1,8 +1,10 @@
-from Queue import Queue
+from queue import Queue
 from pprint import pprint
 import math
 from time import sleep
 from copy import deepcopy
+
+from BlockHandling import BlockHandler
 
 
 class Searcher(object):
@@ -14,73 +16,81 @@ class Searcher(object):
         self._frontier = Queue()
         #self._all_blocks = all_blocks  # todo: use matrix..?
 
+        x, y = self.gameField.get_game_field_block_size()
+        self._blockHandler = BlockHandler(x, y, gameField)
+        print(self._blockHandler.get_blocks())
+
     def _get_relative_point_to_point_distance(self, point1, point2):
         return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
     def get_relative_head_to_fruit_distance(self):
 
         # Just tryout
-        pprint(self.gameField.get_game_matrix())
+        #pprint(self.gameField.get_game_matrix())
 
-        pos_fruit = self.gameField.map_pixels_to_coordinates(self.foodDispatcher.get_food_position())
-        print pos_fruit
-        pos_head = self.gameField.map_pixels_to_coordinates(self.snake.get_head_position())
-        print pos_head
-        return self._get_relative_point_to_point_distance(pos_fruit, pos_head)
+        coo_fruit = self.gameField.map_pixels_to_coordinates(self.foodDispatcher.get_food_position())
+        #print pos_fruit
+        coo_head = self.gameField.map_pixels_to_coordinates(self.snake.get_head_position())
+        #print pos_head
+        return self._get_relative_point_to_point_distance(coo_fruit, coo_head)
 
     def get_relative_point_to_fruit_distance(self, point):
-        pos_fruit = self.gameField.map_pixels_to_coordinates(self.foodDispatcher.get_food_position())
-        return self._get_relative_point_to_point_distance(pos_fruit, point)
+        coo_fruit = self.gameField.map_pixels_to_coordinates(self.foodDispatcher.get_food_position())
+        return self._get_relative_point_to_point_distance(coo_fruit, point)
 
     def get_relative_point_to_head_distance(self, point):
-        pos_head = self.gameField.map_pixels_to_coordinates(self.snake.get_head_position())
-        return self._get_relative_point_to_point_distance(pos_head, point)
+        coo_head = self.gameField.map_pixels_to_coordinates(self.snake.get_head_position())
+        return self._get_relative_point_to_point_distance(coo_head, point)
+
+    def test(self):
+
+        snake_positions = self.snake.get_tail_positions()
+        head_position = self.snake.get_head_position()
+        snake_positions.append(head_position)
+        fruit_pos = self.foodDispatcher.get_food_position()
+        self._blockHandler.update_blocks(snake_positions, fruit_pos)
+
+        coo_head = self.gameField.map_pixels_to_coordinates(head_position)
+        start_element = self._blockHandler.get_block_by_coordinates(coo_head)
+        print(start_element)
+        self._frontier.put(start_element)
+        visited = {}
+        visited[start_element.get_id()] = True
+
+        print(self.get_valid_neighbors(self.get_neighbor_coordinates(start_element)))
 
     def scan(self):
-        pass
+
         pos_head = self.gameField.map_pixels_to_coordinates(self.snake.get_head_position())
-        start_element = deepcopy(pos_head)
+
+        start_element = self._blockHandler.get_block_by_coordinates(self.gameField.map_pixels_to_coordinates(pos_head))
+        print(start_element)
         self._frontier.put(start_element)
 
         visited = {}
         visited[start_element] = True
-        tmp_marker = 1
 
         while not self._frontier.empty():
             current = self._frontier.get()
-            for next in self.get_neighbors(current):
+            for next in self.get_valid_neighbors(self.get_neighbor_coordinates(current)):
                 self._frontier.put(next)
                 visited[next] = True
                 # todo
-
-
-        # Put start element in queue
-        # create visited-dict
-        # put start element (coordinates?) as key in dict and set visited to true
-        # set tmp_marker... why?^^
-        # while queue not empty
-        #  current = queue.get()
-        #  for next in neighbors of current
-        #   put next in queue
-        #   put next in visited-dict and set to true
-
-    def get_neighbors(self, pos):
-        return self.get_valid_neighbors(pos)
 
     def get_neighbor_coordinates(self, block):
 
         neighbors_coordinates = []
         c_x, c_y = block.get_coordinates()
-        print "Block coordinates: %s %s" % (c_x, c_y)
+        print("Block coordinates: %s %s" % (c_x, c_y))
 
         # (+1, 0)
-        if c_x + 1 <= 5:
+        if c_x + 1 <= 19:
             neighbors_coordinates.append((c_x+1, c_y))
         # (-1, 0)
         if c_x - 1 >= 0:
             neighbors_coordinates.append((c_x - 1, c_y))
         # (0, +1)
-        if c_y + 1 <= 5:
+        if c_y + 1 <= 19:
             neighbors_coordinates.append((c_x, c_y + 1))
         # (0, -1)
         if c_y - 1 >= 0:
@@ -88,14 +98,29 @@ class Searcher(object):
 
         return neighbors_coordinates
 
-    def get_valid_neighbors(self, n_coordinates):
+    def get_valid_neighbors(self, neighbor_coordinates):
+        """
+
+        Returns list of valid coordinates
+
+        :param neighbor_coordinates:
+        :return:
+        """
         valid_blocks = []
-        for c in n_coordinates:
-            #print c
-            for b in self._all_blocks:
-                if b.get_block_type() == "barrier":  # todo: check if != 1 or 2
+
+        #game_matrix = self.gameField.get_game_matrix()
+        #print(pprint(game_matrix))
+        for c in neighbor_coordinates:
+            #if game_matrix[c[1]][c[0]] == 1:  # Tail, Beware: Matrix access first Y-axis, then X-axis!
+            #    continue
+            #if game_matrix[c[1]][c[0]] == 2:  # Head, Beware: Matrix access first Y-axis, then X-axis!
+            #    continue
+            for b in self._blockHandler.get_blocks():
+                if b.get_block_type() == "tail":
+                    continue
+                elif b.get_block_type() == "head":
                     continue
                 if b.get_coordinates() == c:
-                    print "Match: %s (%s)" % (b, c)
+                    print("Match: %s (%s)" % (b, c))
                     valid_blocks.append(b)
         return valid_blocks
