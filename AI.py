@@ -15,6 +15,8 @@ class AI(object):
 
         self.searcher = Searcher(gameField, snake, food_dispatcher)
 
+        self._path = None
+
     def _right_wall(self):
         return self._snake.get_head_position()[0] >= WINDOW_SIZE[0] - BLOCKSIZE - BORDER_SIZE
 
@@ -41,26 +43,31 @@ class AI(object):
         open_list.append(start_node)
 
         while open_list:
-            open_list.sort(key=lambda b: b.get_node_cost())
+            open_list.sort(key=lambda b: b.get_node_cost()) # TODO: Needed? / Use PriorityQueue
             current_node = open_list.pop(0)
             closed_list.append(current_node)
             if current_node.get_coordinates() == target_node.get_coordinates():
-                print("DOOOOOOOONNNNNEEEEEE")
+                #print("DOOOOOOOONNNNNEEEEEE")
                 # TODO: backtrack function?
+
                 path = []
                 current = current_node
                 while current is not None:
                     path.append(current)
                     current = current.get_parent()
-                return path[::-1]
+
+                path = path[::-1]
+                path.pop(0)
+                return path
 
             for _next in self.searcher.get_neighbors(current_node, nodes):
+                #print(_next)
                 if _next in closed_list:
+                    #print('---')
                     continue
-
                 _next.set_parent(current_node)
 
-                _next.set_head_distance(current_node.get_head_distance() + 1)
+                _next.set_head_distance(current_node.get_head_distance() + 10)
                 _next.set_food_distance(self.searcher.get_heuristic_food_distance(_next))  # TODO
                 _next.set_node_cost(_next.get_head_distance() + _next.get_food_distance())
 
@@ -96,11 +103,27 @@ class AI(object):
 
         path = self._get_path(start_node, target_node, nodes)
 
+        """
         print('*********************')
         print("Start node: %s" % start_node)
         print("Target node: %s" % target_node)
         print("Path: %s" % path)
         print('*********************')
+        """
+
+        first_step = path.pop(0)
+        #move_dir = self._snake.get_move_direction()
+
+        if first_step.get_coordinates()[0] == start_node.get_coordinates()[0]:
+            if first_step.get_coordinates()[1] > start_node.get_coordinates()[1]:
+                self._snake.update_move_direction('down')
+            else:
+                self._snake.update_move_direction('up')
+        else:
+            if first_step.get_coordinates()[0] > start_node.get_coordinates()[0]:
+                self._snake.update_move_direction('right')
+            else:
+                self._snake.update_move_direction('left')
 
     def greedy_walk(self):
         food_pos = self._foodDispatcher.get_food_position()

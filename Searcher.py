@@ -1,6 +1,6 @@
 from queue import Queue
 from pprint import pprint
-import math
+from math import sqrt
 from time import sleep
 from copy import deepcopy
 
@@ -16,6 +16,10 @@ class Searcher(object):
     def get_heuristic_food_distance(self, node):
         point1 = node.get_coordinates()
         point2 = self.foodDispatcher.get_food_coordinates()
+        dx = abs(point1[0] - point2[0])
+        dy = abs(point1[1] - point2[1])
+        #return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
+        round(10 * sqrt(dx ** 2 + dy ** 2))
         return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
     def get_neighbors(self, node, nodes):

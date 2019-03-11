@@ -35,8 +35,7 @@ class Game:
         self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, size=BLOCKSIZE)
 
         self._gameField = GameField(self._snake)
-        self._foodDispatcher = FoodDispatcher(self._screen, (BORDER_SIZE, BORDER_SIZE),
-                                        (WINDOW_SIZE[0] - BORDER_SIZE, WINDOW_SIZE[1] - BORDER_SIZE), self._gameField)
+        self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
 
         self._ai = AI(self._snake, self._foodDispatcher, self._gameField)
 
@@ -114,7 +113,7 @@ class Game:
     def run_game(self):
         while not self._quit:
             #self._clock.tick(FPS)
-            self._clock.tick(1)
+            self._clock.tick(20)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -137,9 +136,7 @@ class Game:
                     del (self._snake)
                     self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
                     self._gameField = GameField(self._snake)
-                    self._foodDispatcher = FoodDispatcher(self._screen, (BORDER_SIZE, BORDER_SIZE),
-                                                    (WINDOW_SIZE[0] - BORDER_SIZE, WINDOW_SIZE[1] - BORDER_SIZE),
-                                                          self._gameField)
+                    self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
                     self._ai = AI(self._snake, self._foodDispatcher, self._gameField)
             else:
                 self._check_eating()

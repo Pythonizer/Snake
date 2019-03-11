@@ -5,13 +5,8 @@ from Food import Food
 
 
 class FoodDispatcher(object):
-    def __init__(self, screen, min_range, max_range, gameField):  # todo: handle snake connection differently
+    def __init__(self, screen, gameField):  # todo: handle snake connection differently
         self._screen = screen
-        self._min_x = min_range[0]
-        self._min_y = min_range[1]
-        self._max_x = max_range[0]
-        self._max_y = max_range[1]
-
         self.gameField = gameField
 
         self._food = None
