@@ -14,7 +14,6 @@ START_MENU_OPTIONS = ['1. Start Game', '2. AI Player', '3. Settings']
 GAME_OVER_MENU_OPTIONS = ['1. Play again', '2. AI Again', '3. Quit']
 MOVE_STEP = 30
 BACKGORUND = Colors.BLACK
-GAMEOVER = False
 BLOCKSIZE = 30
 ASSETS = 'assets/'
 SNAKE_HEAD_IMG = ASSETS + 'Snake_Head.png'

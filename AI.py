@@ -3,6 +3,8 @@ from Settings import BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
 
 from Searcher import Searcher
 
+from Node import Node
+
 
 class AI(object):
     def __init__(self, snake, food_dispatcher, gameField):
@@ -12,16 +14,6 @@ class AI(object):
         self._last_move_direction = None
 
         self.searcher = Searcher(gameField, snake, food_dispatcher)
-
-    def test2(self):
-        self.searcher.test()
-
-    def test(self):
-        #print self.searcher.get_neighbor_coordinates((0, 0))
-        #print self.searcher.get_neighbor_coordinates((19, 19))
-        #print self.searcher.get_neighbor_coordinates((5, 10))
-        neighbors = self.searcher.get_neighbor_coordinates(self._gameField.map_pixels_to_coordinates(self._snake.get_head_position()))
-        print(self.searcher.get_valid_neighbors(neighbors))
 
     def _right_wall(self):
         return self._snake.get_head_position()[0] >= WINDOW_SIZE[0] - BLOCKSIZE - BORDER_SIZE
@@ -38,93 +30,77 @@ class AI(object):
     def _lower_wall_with_space(self):
         return self._snake.get_head_position()[1] >= WINDOW_SIZE[1] - 4*BLOCKSIZE
 
-    def tryout(self):
-        if self._snake.get_move_direction() == 'right':
-            #print "right -> up"
-            self._snake.update_move_direction('up')
-        elif self._snake.get_move_direction() == 'left':
-            #print "left -> down"
-            self._snake.update_move_direction('down')
-        elif self._snake.get_move_direction() == 'down':
-            #print "down -> right"
-            self._snake.update_move_direction('right')
-        elif self._snake.get_move_direction() == 'up':
-            #print "up -> left"
-            self._snake.update_move_direction('left')
-        else:
-            self._snake.update_move_direction('right')
+    def _get_path(self, start_node, target_node, nodes):
+        open_list = list()
+        closed_list = list()
 
-    def tryout_wall(self):
-        if not self._snake.get_move_direction():
-            self._snake.update_move_direction('right')
+        start_node.set_parent(None)
 
-        if self._left_wall():
-            if self._snake.get_move_direction() == 'left':
-                self._snake.update_move_direction('down')
+        start_node.set_head_distance(0)
+        start_node.set_node_cost(0)
+        open_list.append(start_node)
 
-        if self._right_wall():
-            if self._snake.get_move_direction() == 'right':
-                self._snake.update_move_direction('up')
+        while open_list:
+            open_list.sort(key=lambda b: b.get_node_cost())
+            current_node = open_list.pop(0)
+            closed_list.append(current_node)
+            if current_node.get_coordinates() == target_node.get_coordinates():
+                print("DOOOOOOOONNNNNEEEEEE")
+                # TODO: backtrack function?
+                path = []
+                current = current_node
+                while current is not None:
+                    path.append(current)
+                    current = current.get_parent()
+                return path[::-1]
 
-        if self._upper_wall():
-            if self._snake.get_move_direction() == 'up':
-                self._snake.update_move_direction('left')
+            for _next in self.searcher.get_neighbors(current_node, nodes):
+                if _next in closed_list:
+                    continue
 
-        if self._lower_wall():
-            if self._snake.get_move_direction() == 'down':
-                self._snake.update_move_direction('right')
+                _next.set_parent(current_node)
 
-    def simple_walk(self):
-        #print '..simple walk..'
-        if not self._snake.get_move_direction():
-            self._snake.update_move_direction('right')
-            self._last_move_direction = 'right'
+                _next.set_head_distance(current_node.get_head_distance() + 1)
+                _next.set_food_distance(self.searcher.get_heuristic_food_distance(_next))  # TODO
+                _next.set_node_cost(_next.get_head_distance() + _next.get_food_distance())
 
-        if self._right_wall():
-            if self._snake.get_move_direction() == 'right':
-                self._last_move_direction = 'right'
-                self._snake.update_move_direction('up')
-                return
+                if _next in open_list and _next.get_head_distance() >= current_node.get_food_distance():
+                    continue
+                open_list.append(_next)
 
-        if self._upper_wall():
-            if self._snake.get_move_direction() == 'up':
-                if self._last_move_direction == 'left':
-                    self._snake.update_move_direction('left')
-                    return
-                elif self._last_move_direction == 'right':
-                    if not self._right_wall():
-                        self._snake.update_move_direction('right')
-                    else:
-                        self._snake.update_move_direction('left')
-                self._last_move_direction = 'up'
+    def think(self):
 
-            elif self._snake.get_move_direction() == 'left':
-                self._last_move_direction = 'left'
-                self._snake.update_move_direction('down')
-                return
+        playground = self._gameField.get_play_ground()
+        head_position = self._snake.get_head_position()
+        tail_positions = self._snake.get_tail_positions()
+        food_position = self._foodDispatcher.get_food_position()
 
-        if self._left_wall():
-            if self._snake.get_move_direction() == 'down':
-                if self._lower_wall():
-                    self._last_move_direction = 'down'
-                    self._snake.update_move_direction('right')
-                    return
-            elif self._snake.get_move_direction() == 'right':
-                self._last_move_direction = 'right'
-                self._snake.update_move_direction('up')
-                return
+        start_node = None
+        target_node = None
 
-        if self._lower_wall_with_space():
-            if self._snake.get_move_direction() == 'down':
-                if not self._left_wall():
-                    self._last_move_direction = 'down'
-                    self._snake.update_move_direction('left')
-                else:
-                    return
-                    #self._snake.update_move_direction('right')
-            elif self._snake.get_move_direction() == 'left':
-                self._last_move_direction = 'left'
-                self._snake.update_move_direction('up')
+        nodes = []
+        for pos in playground:
+            coordinates = self._gameField.map_pixels_to_coordinates(pos)
+            if pos == head_position:
+                start_node = Node(coordinates[0], coordinates[1], node_type="start_node")
+                nodes.append(start_node)
+            elif pos in tail_positions:
+                node = Node(coordinates[0], coordinates[1], node_type="blocking_node")
+                nodes.append(node)
+            elif pos == food_position:
+                target_node = Node(coordinates[0], coordinates[1], node_type="target_node")
+                nodes.append(target_node)
+            else:
+                node = Node(coordinates[0], coordinates[1])
+                nodes.append(node)
+
+        path = self._get_path(start_node, target_node, nodes)
+
+        print('*********************')
+        print("Start node: %s" % start_node)
+        print("Target node: %s" % target_node)
+        print("Path: %s" % path)
+        print('*********************')
 
     def greedy_walk(self):
         food_pos = self._foodDispatcher.get_food_position()

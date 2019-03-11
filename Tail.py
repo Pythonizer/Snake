@@ -55,7 +55,6 @@ class Tail(list):
 
     def draw(self, screen):
         for t in self[1:]:
-            #pygame.draw.rect(screen, self._color, t)
             if t[3]:
                 rotated_img = pygame.transform.rotate(self._img_bend, t[4])
                 screen.blit(rotated_img, (t[0], t[1]))

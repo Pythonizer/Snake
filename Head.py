@@ -8,20 +8,25 @@ class Head(pygame.sprite.Sprite):
 
         self.img = pygame.image.load(SNAKE_HEAD_IMG)
 
-        self._pox_x = pos_x
-        self._pox_y = pos_y
+        self._pos_x = pos_x
+        self._pos_y = pos_y
+
+        self._parent = None
 
     def update_x_position(self, pos):
-        self._pox_x = pos
+        self._pos_x = pos
 
     def update_y_position(self, pos):
-        self._pox_y = pos
+        self._pos_y = pos
 
     def get_pos_x(self):
-        return self._pox_x
+        return self._pos_x
 
     def get_pos_y(self):
-        return self._pox_y
+        return self._pos_y
+
+    def get_position(self):
+        return self._pos_x, self._pos_y
 
     def draw(self, screen, direction="right"):
         angle = 0
@@ -35,4 +40,4 @@ class Head(pygame.sprite.Sprite):
             angle = 270
 
         rotated_img = pygame.transform.rotate(self.img, angle)
-        screen.blit(rotated_img, (self._pox_x, self._pox_y))
+        screen.blit(rotated_img, (self._pos_x, self._pos_y))
