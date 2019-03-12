@@ -18,6 +18,10 @@ class Node:
     def get_coordinates(self):
         return self._coordinate_x, self._coordinate_y
 
+    def set_coordinates(self, x, y):
+        self._coordinate_x = x
+        self._coordinate_y = y
+
     def set_head_distance(self, dist):
         self._dist_head = dist
 

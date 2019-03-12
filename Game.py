@@ -113,7 +113,7 @@ class Game:
     def run_game(self):
         while not self._quit:
             #self._clock.tick(FPS)
-            self._clock.tick(20)
+            self._clock.tick(30)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
