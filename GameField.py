@@ -46,7 +46,7 @@ class GameField(object):
         :param pixels:
         :return:
         """
-        return ((pixels[0] // BLOCKSIZE) - 1, (pixels[1] // BLOCKSIZE) - 1)
+        return (int((pixels[0] // BLOCKSIZE) - 1), int((pixels[1] // BLOCKSIZE) - 1))
 
     def map_coordinates_to_pixles(self, coordinates):
         """

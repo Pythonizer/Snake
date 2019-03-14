@@ -5,7 +5,7 @@ from Searcher import Searcher
 
 from Node import Node
 
-from copy import copy
+from copy import deepcopy, copy
 
 
 class AI(object):
@@ -24,44 +24,151 @@ class AI(object):
         self._nodes = None
 
     def _get_path_back(self):
-        virtual_path = copy(self._path)
-        virtual_start_node = copy(self._start_node)
-        virtual_start_node.set_coordinates(*virtual_path[-1].get_coordinates())
-
-        print('sdfsf')
-
-        tail_positions = self._snake.get_tail_positions()
-
-        for t in tail_positions:
-            print(t)
-        print("--------")
-        """
-        (410.0, 380.0)
-        (380.0, 380.0)
-        (350.0, 380.0)
-        (320.0, 380.0)
-        (290.0, 380.0)
-        (260.0, 380.0)
-        (230.0, 380.0)
-        # Next would be head
         """
 
-        #for p in virtual_path:
-        #    print(p)
+        self._snake.get_tail_positions() (example)
+            (410.0, 380.0)  # Last tail-part at position 0
+            (380.0, 380.0)
+            (350.0, 380.0)
+            (320.0, 380.0)
+            (290.0, 380.0)
+            (260.0, 380.0)
+            (230.0, 380.0)
+            # Next would be head
 
-        return True  # TODO
+        self._path (example)
+            [Node(coordinate_x=10, coordinate_y=9, node_type='free',
+            Node(coordinate_x=10, coordinate_y=8, node_type='free',
+            Node(coordinate_x=10, coordinate_y=7, node_type='free',
+            Node(coordinate_x=10, coordinate_y=6, node_type='free',
+            Node(coordinate_x=11, coordinate_y=6, node_type='free',
+            Node(coordinate_x=12, coordinate_y=6, node_type='free',
+            Node(coordinate_x=13, coordinate_y=6, node_type='free',
+            Node(coordinate_x=14, coordinate_y=6, node_type='free',
+            Node(coordinate_x=15, coordinate_y=6, node_type='free',
+            Node(coordinate_x=16, coordinate_y=6, node_type='free',
+            Node(coordinate_x=17, coordinate_y=6, node_type='free',
+            Node(coordinate_x=18, coordinate_y=6, node_type='target_node']
+
+        :return:
+        """
+
+        print('-------')
+        virtual_nodes = []
+
+        # Get a list of the snakes coordinates (tail & head)
+        real_tail_positions = self._snake.get_tail_positions()
+        real_tail_coordinates = list(map(lambda real_pos: self._gameField.map_pixels_to_coordinates(real_pos), real_tail_positions))
+        real_snake_coordinates = real_tail_coordinates
+        real_snake_coordinates.append(self._gameField.map_pixels_to_coordinates(self._snake.get_head_position()))
+
+        # Make a copy of the planed path
+        virtual_path = deepcopy(self._path)
+
+        # The virtual start node will be the last piece of the path
+        virtual_start_node = copy(virtual_path[-1])
+        virtual_start_node.set_node_type('start_node')
+
+        # Find out virtual target. The +/- 1 is for the head
+        # TODO: Beware that one tail will appear after eat!
+        virtual_free_coordinates = []
+        virtual_blocking_coordinates = []
+        if len(real_snake_coordinates) > len(virtual_path):
+            # Set virtual target node
+            v_target_index = len(virtual_path)-1
+            v_target_coo = real_snake_coordinates[v_target_index]
+            virtual_target_node = Node(v_target_coo[0], v_target_coo[1], node_type="target_node")
+
+            # Make virtual moved snake free, except the virtual_target
+            for i in range(0, len(virtual_path)-1):
+                virtual_free_coordinates.append(real_snake_coordinates.pop(0))
+
+            # Make remaining snake blocking, except the virtual_target
+            start_of_blocking_snake = len(virtual_path)
+            for i in range(start_of_blocking_snake, len(real_snake_coordinates)):
+                virtual_blocking_coordinates.append(real_snake_coordinates[i])
+
+            # Remove last node of path because its the real target/ virtual_start_node
+            virtual_path.pop(-1)
+            # The rest of the path is blocking
+            for vp_node in virtual_path:
+                virtual_blocking_coordinates.append(vp_node.get_coordinates())
+
+            print('******')
+            print('VBC: %s' % virtual_blocking_coordinates)
+            print('VFC: %s' % virtual_free_coordinates)
+            print('******')
+
+        elif len(real_snake_coordinates)+1 < len(virtual_path):
+            #print(len(real_snake_coordinates))
+            v_target_index = len(virtual_path) - (len(real_snake_coordinates)+1)
+            #v_target_index = len(virtual_path) - (len(real_tail_positions)+1)
+            v_target_index = v_target_index - len(virtual_path)
+            print('VTargetIndex: %s' % v_target_index)
+            #print('VPath: %s' % virtual_path)
+            virtual_target_node = deepcopy(virtual_path[v_target_index])
+            virtual_target_node.set_node_type('target_node')
+
+            for i, x in enumerate(virtual_path):
+                if real_snake_coordinates:
+                    virtual_free_coordinates.append(real_snake_coordinates.pop(0))
+                    virtual_blocking_coordinates.append(virtual_path[-1*(i+1)].get_coordinates())
+                else:
+                    virtual_free_coordinates.append(x.get_coordinates())
+
+        else:
+            virtual_target_node = deepcopy(virtual_path[0])
+            virtual_target_node.set_node_type('target_node')
+
+        #print('VBlocking: %s' % virtual_blocking_coordinates)
+        #print('VFree: %s' % virtual_free_coordinates)
+
+        playground = self._gameField.get_play_ground()
+        coordinate_playground = list(map(lambda c: self._gameField.map_pixels_to_coordinates(c), playground))
+        for coordinates in coordinate_playground:
+
+            if coordinates in virtual_free_coordinates:
+                virtual_nodes.append(Node(coordinates[0], coordinates[1], node_type="free"))
+            elif coordinates in coordinates in virtual_blocking_coordinates:
+                virtual_nodes.append(Node(coordinates[0], coordinates[1], node_type="blocking_node"))
+
+            elif coordinates == virtual_start_node.get_coordinates():
+                virtual_nodes.append(virtual_start_node)
+
+            elif coordinates == virtual_target_node.get_coordinates():
+                virtual_nodes.append(virtual_target_node)
+            else:
+
+                virtual_nodes.append(Node(coordinates[0], coordinates[1]))
+
+        #print('....')
+        #print(virtual_nodes)
+        #for n in virtual_nodes:
+        #    if n.get_node_type() == 'target_node' or n.get_node_type() == 'start_node':
+        #        print(n)
+        #print('....')
+
+        virtual_path_back = self._get_path(virtual_start_node, virtual_target_node, virtual_nodes)
+        print('VStart: %s' % virtual_start_node)
+        print('VTarget: %s' % virtual_target_node)
+        #print('VPathBack: %s' % virtual_path_back)
+
+        print('-------')
+        return True if virtual_path_back else False
 
     def think(self):
 
         if not self._path:
             self._create_nodes()
             self._path = self._get_path(self._start_node, self._target_node, self._nodes)
+            self._path_back = None
 
         if self._path:
             if not self._path_back:
                 self._path_back = self._get_path_back()
 
             if self._path_back:  # Todo: check if path back exists, then:
+            #if True:  # Todo: check if path back exists, then:
                 first_step = self._path.pop(0)
                 if first_step.get_coordinates()[0] == self._start_node.get_coordinates()[0]:
                     if first_step.get_coordinates()[1] > self._start_node.get_coordinates()[1]:
@@ -86,12 +193,6 @@ class AI(object):
         head_position = self._snake.get_head_position()
         tail_positions = self._snake.get_tail_positions()
         food_position = self._foodDispatcher.get_food_position()
-
-        for t in tail_positions:
-            print(t)
-        print("--------")
-        print(head_position)
-        print("--------")
 
         self._start_node = None
         self._target_node = None

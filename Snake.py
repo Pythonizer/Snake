@@ -20,6 +20,10 @@ class Snake(object):
         self._tail = Tail()
         self._length = 0
 
+        # Start with tail length of 1?
+        #self.eat()
+        #self._update_tail()
+
     def get_head(self):
         return self._head
 

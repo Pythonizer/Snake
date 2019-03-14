@@ -113,7 +113,7 @@ class Game:
     def run_game(self):
         while not self._quit:
             #self._clock.tick(FPS)
-            self._clock.tick(30)
+            self._clock.tick(15)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -124,6 +124,8 @@ class Game:
 
                     if self._game_mode == 'player':
                         self._handle_player_action(event)
+
+            #self._update_snake()
 
             if self._game_mode == 'ai':
                 self._ai.think()

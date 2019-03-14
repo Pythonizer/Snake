@@ -37,7 +37,7 @@ class GameOverMenu(GameMenu):
                         self.menu_loop = False
 
             # Redraw the background
-            self.screen.fill(self.bg_color)
+            #self.screen.fill(self.bg_color)
 
             self.screen.blit(self._title, [self._title_pos_x, self._title_pos_y])
 

@@ -18,10 +18,6 @@ class Node:
     def get_coordinates(self):
         return self._coordinate_x, self._coordinate_y
 
-    def set_coordinates(self, x, y):
-        self._coordinate_x = x
-        self._coordinate_y = y
-
     def set_head_distance(self, dist):
         self._dist_head = dist
 
@@ -48,6 +44,24 @@ class Node:
 
     def get_node_type(self):
         return self._node_type
+
+    def set_coordinates(self, x, y):
+        """
+        Just used for virtual path
+        :param x:
+        :param y:
+        :return:
+        """
+        self._coordinate_x = x
+        self._coordinate_y = y
+
+    def set_node_type(self, node_type):
+        """
+        Just used for virtual path
+        :param node_type:
+        :return:
+        """
+        self._node_type = node_type
 
     def __repr__(self):
         return "Node(coordinate_x={c1}, coordinate_y={c2}, node_type='{n_type}'".format(c1=self._coordinate_x,
