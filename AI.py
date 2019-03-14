@@ -89,7 +89,8 @@ class AI(object):
                 virtual_blocking_coordinates.append(real_snake_coordinates[i])
 
             # Remove last node of path because its the real target/ virtual_start_node
-            virtual_path.pop(-1)
+            if virtual_path:
+                virtual_path.pop(-1)
             # The rest of the path is blocking
             for vp_node in virtual_path:
                 virtual_blocking_coordinates.append(vp_node.get_coordinates())
@@ -99,26 +100,39 @@ class AI(object):
             print('VFC: %s' % virtual_free_coordinates)
             print('******')
 
-        elif len(real_snake_coordinates)+1 < len(virtual_path):
-            #print(len(real_snake_coordinates))
-            v_target_index = len(virtual_path) - (len(real_snake_coordinates)+1)
-            #v_target_index = len(virtual_path) - (len(real_tail_positions)+1)
-            v_target_index = v_target_index - len(virtual_path)
-            print('VTargetIndex: %s' % v_target_index)
-            #print('VPath: %s' % virtual_path)
-            virtual_target_node = deepcopy(virtual_path[v_target_index])
-            virtual_target_node.set_node_type('target_node')
+        elif len(real_snake_coordinates) < len(virtual_path):
+            v_target_index = len(real_snake_coordinates) # + 1
+            print('===========')
+            print(real_snake_coordinates)
+            print(virtual_path)
+            print('===========')
+            # Get virtual target
+            virtual_target_node = virtual_path.pop(v_target_index)
+            virtual_target_node.set_node_type("target_node")
 
-            for i, x in enumerate(virtual_path):
-                if real_snake_coordinates:
-                    virtual_free_coordinates.append(real_snake_coordinates.pop(0))
-                    virtual_blocking_coordinates.append(virtual_path[-1*(i+1)].get_coordinates())
-                else:
-                    virtual_free_coordinates.append(x.get_coordinates())
+
+            # Reverse virtual path
+            virtual_path_reversed = virtual_path[::-1]
+
+            for i in real_snake_coordinates:
+                # Whole snake will be free
+                virtual_free_coordinates.append(i)
+                # Last bit of virtual path (length of snake) will be blocking
+                virtual_blocking_coordinates.append(virtual_path_reversed.pop(0).get_coordinates())
+            for vp_node in virtual_path_reversed:
+                virtual_free_coordinates.append(vp_node.get_coordinates())
 
         else:
-            virtual_target_node = deepcopy(virtual_path[0])
-            virtual_target_node.set_node_type('target_node')
+            # Path is blocking
+            for vp_node in virtual_path:
+                virtual_blocking_coordinates.append(vp_node.get_coordinates())
+
+            # Virtual target
+            virtual_target_coordinates = real_snake_coordinates.pop(-1)
+            virtual_target_node = Node(virtual_target_coordinates[0], virtual_target_coordinates[1], 'target_node')
+            # Set snake to free
+            for s in real_snake_coordinates:
+                virtual_free_coordinates.append(s)
 
         #print('VBlocking: %s' % virtual_blocking_coordinates)
         #print('VFree: %s' % virtual_free_coordinates)
