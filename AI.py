@@ -7,6 +7,10 @@ from Node import Node
 
 from copy import deepcopy, copy
 
+from pprint import pprint
+
+import pygame
+
 
 class AI(object):
     def __init__(self, snake, food_dispatcher, gameField):
@@ -18,12 +22,13 @@ class AI(object):
         self.searcher = Searcher(gameField, snake, food_dispatcher)
 
         self._path = None
-        self._path_back = None
+        self._path_back_exists = None
+        self._path_to_tail = None
         self._start_node = None
         self._target_node = None
         self._nodes = None
 
-    def _get_path_back(self):
+    def _get_path_back_existance(self):
         """
 
         self._snake.get_tail_positions() (example)
@@ -53,7 +58,6 @@ class AI(object):
         :return:
         """
 
-        print('-------')
         virtual_nodes = []
 
         # Get a list of the snakes coordinates (tail & head)
@@ -70,18 +74,15 @@ class AI(object):
         virtual_start_node.set_node_type('start_node')
 
         # Find out virtual target. The +/- 1 is for the head
-        # TODO: Beware that one tail will appear after eat!
-        virtual_free_coordinates = []
+        # Beware that one tail will appear after eat!
         virtual_blocking_coordinates = []
         if len(real_snake_coordinates) > len(virtual_path):
             # Set virtual target node
-            v_target_index = len(virtual_path)-1
+            v_target_index = len(virtual_path) - 1
             v_target_coo = real_snake_coordinates[v_target_index]
             virtual_target_node = Node(v_target_coo[0], v_target_coo[1], node_type="target_node")
 
-            # Make virtual moved snake free, except the virtual_target
-            for i in range(0, len(virtual_path)-1):
-                virtual_free_coordinates.append(real_snake_coordinates.pop(0))
+            # Virtual moved snake will be free, except the virtual_target
 
             # Make remaining snake blocking, except the virtual_target
             start_of_blocking_snake = len(virtual_path)
@@ -91,59 +92,40 @@ class AI(object):
             # Remove last node of path because its the real target/ virtual_start_node
             if virtual_path:
                 virtual_path.pop(-1)
+
             # The rest of the path is blocking
             for vp_node in virtual_path:
                 virtual_blocking_coordinates.append(vp_node.get_coordinates())
 
-            print('******')
-            print('VBC: %s' % virtual_blocking_coordinates)
-            print('VFC: %s' % virtual_free_coordinates)
-            print('******')
-
         elif len(real_snake_coordinates) < len(virtual_path):
-            v_target_index = len(real_snake_coordinates) # + 1
-            print('===========')
-            print(real_snake_coordinates)
-            print(virtual_path)
-            print('===========')
-            # Get virtual target
-            virtual_target_node = virtual_path.pop(v_target_index)
-            virtual_target_node.set_node_type("target_node")
-
-
             # Reverse virtual path
             virtual_path_reversed = virtual_path[::-1]
 
-            for i in real_snake_coordinates:
-                # Whole snake will be free
-                virtual_free_coordinates.append(i)
-                # Last bit of virtual path (length of snake) will be blocking
-                virtual_blocking_coordinates.append(virtual_path_reversed.pop(0).get_coordinates())
-            for vp_node in virtual_path_reversed:
-                virtual_free_coordinates.append(vp_node.get_coordinates())
+            v_target_index = len(real_snake_coordinates)  # + 1
+            # Get virtual target
+            virtual_target_node = virtual_path_reversed.pop(v_target_index)
+            virtual_target_node.set_node_type("target_node")
+
+            # Last bit of virtual path (length of snake) will be blocking
+            for i in range(1, len(real_snake_coordinates)):
+                virtual_blocking_coordinates.append(virtual_path_reversed[i].get_coordinates())
+            # Whole snake will be free
 
         else:
-            # Path is blocking
-            for vp_node in virtual_path:
-                virtual_blocking_coordinates.append(vp_node.get_coordinates())
+            # Path, except last node, is blocking
+            for i in range(0, len(virtual_path)-1):
+                virtual_blocking_coordinates.append(virtual_path[i].get_coordinates())
 
             # Virtual target
             virtual_target_coordinates = real_snake_coordinates.pop(-1)
             virtual_target_node = Node(virtual_target_coordinates[0], virtual_target_coordinates[1], 'target_node')
-            # Set snake to free
-            for s in real_snake_coordinates:
-                virtual_free_coordinates.append(s)
+            # Remaining snake will be free
 
-        #print('VBlocking: %s' % virtual_blocking_coordinates)
-        #print('VFree: %s' % virtual_free_coordinates)
-
-        playground = self._gameField.get_play_ground()
+        playground = self._gameField.get_play_ground_positions()
         coordinate_playground = list(map(lambda c: self._gameField.map_pixels_to_coordinates(c), playground))
         for coordinates in coordinate_playground:
 
-            if coordinates in virtual_free_coordinates:
-                virtual_nodes.append(Node(coordinates[0], coordinates[1], node_type="free"))
-            elif coordinates in coordinates in virtual_blocking_coordinates:
+            if coordinates in virtual_blocking_coordinates:
                 virtual_nodes.append(Node(coordinates[0], coordinates[1], node_type="blocking_node"))
 
             elif coordinates == virtual_start_node.get_coordinates():
@@ -152,58 +134,135 @@ class AI(object):
             elif coordinates == virtual_target_node.get_coordinates():
                 virtual_nodes.append(virtual_target_node)
             else:
-
                 virtual_nodes.append(Node(coordinates[0], coordinates[1]))
 
-        #print('....')
-        #print(virtual_nodes)
-        #for n in virtual_nodes:
-        #    if n.get_node_type() == 'target_node' or n.get_node_type() == 'start_node':
-        #        print(n)
-        #print('....')
-
         virtual_path_back = self._get_path(virtual_start_node, virtual_target_node, virtual_nodes)
-        print('VStart: %s' % virtual_start_node)
-        print('VTarget: %s' % virtual_target_node)
-        #print('VPathBack: %s' % virtual_path_back)
 
-        print('-------')
+        # Used to assert node results
+        if False:
+            if not len(virtual_nodes) == 400:
+                raise RuntimeError("len(virtual_nodes != 400, %s" % len(virtual_nodes))
+            c_s = 0
+            c_t = 0
+            c_b = 0
+            for n in virtual_nodes:
+                if n.get_node_type() == 'target_node':
+                    c_t += 1
+                elif n.get_node_type() == 'start_node':
+                    c_s += 1
+                elif n.get_node_type() == 'blocking_node':
+                    c_b += 1
+            if c_s != 1:
+                print(virtual_start_node)
+                print(virtual_target_node)
+                pprint(virtual_nodes)
+                raise RuntimeError("VStart node != 1, %s" % c_s)
+            if c_t != 1:
+                raise RuntimeError("VTarget node != 1, %s" % c_t)
+            if c_b != len(virtual_blocking_coordinates):
+                pprint(virtual_blocking_coordinates)
+                pprint(virtual_nodes)
+                raise RuntimeError("Blocking nodes %s != %s" % (len(virtual_blocking_coordinates), c_b))
+
+            print('\n')
+            print('VStart: %s' % virtual_start_node)
+            print('VTarget: %s' % virtual_target_node)
+            print('VBlocking:')
+            pprint(virtual_blocking_coordinates)
+
         return True if virtual_path_back else False
+
+    def _get_path_to_tail(self):
+        playground_coordinates = self._gameField.get_playground_coordinates()
+        head_coordinate = self._gameField.map_pixels_to_coordinates(self._snake.get_head_position())
+        tail_coordinates = list(map(lambda pos: self._gameField.map_pixels_to_coordinates(pos), self._snake.get_tail_positions()))
+        print("Tail-Coordinates: %s" % tail_coordinates)
+        last_tail_coordinate = tail_coordinates.pop(0)
+        print('Head: %s' % str(head_coordinate))
+        print("Target_tail: %s" % str(last_tail_coordinate))
+
+        self._start_node = None
+        target_tail_node = None
+        path_to_tail_nodes = []
+
+        for coordinates in playground_coordinates:
+            if coordinates == head_coordinate:
+                self._start_node = Node(coordinates[0], coordinates[1], node_type="start_node")
+                path_to_tail_nodes.append(self._start_node)
+            elif coordinates in tail_coordinates:
+                node = Node(coordinates[0], coordinates[1], node_type="blocking_node")
+                path_to_tail_nodes.append(node)
+            elif coordinates == last_tail_coordinate:
+                target_tail_node = Node(coordinates[0], coordinates[1], node_type="target_node")
+                path_to_tail_nodes.append(target_tail_node)
+            else:
+                path_to_tail_nodes.append(Node(coordinates[0], coordinates[1]))
+        return self._get_path(self._start_node, target_tail_node, path_to_tail_nodes)
+
+    def _decide_moving_direction(self, path_to_follow):
+        first_step = path_to_follow.pop(0)
+        if first_step.get_coordinates()[0] == self._start_node.get_coordinates()[0]:
+            if first_step.get_coordinates()[1] > self._start_node.get_coordinates()[1]:
+                self._snake.update_move_direction('down')
+            else:
+                self._snake.update_move_direction('up')
+        else:
+            if first_step.get_coordinates()[0] > self._start_node.get_coordinates()[0]:
+                self._snake.update_move_direction('right')
+            else:
+                self._snake.update_move_direction('left')
+
+        self._start_node.set_coordinates(*first_step.get_coordinates())  # Update _start_node to new Coordinates
 
     def think(self):
 
         if not self._path:
-            self._create_nodes()
+            self._create_real_path_nodes()
             self._path = self._get_path(self._start_node, self._target_node, self._nodes)
-            self._path_back = None
+            self._path_back_exists = None
 
         if self._path:
-            if not self._path_back:
-                self._path_back = self._get_path_back()
 
-            if self._path_back:  # Todo: check if path back exists, then:
-            #if True:  # Todo: check if path back exists, then:
-                first_step = self._path.pop(0)
-                if first_step.get_coordinates()[0] == self._start_node.get_coordinates()[0]:
-                    if first_step.get_coordinates()[1] > self._start_node.get_coordinates()[1]:
-                        self._snake.update_move_direction('down')
-                    else:
-                        self._snake.update_move_direction('up')
-                else:
-                    if first_step.get_coordinates()[0] > self._start_node.get_coordinates()[0]:
-                        self._snake.update_move_direction('right')
-                    else:
-                        self._snake.update_move_direction('left')
+            #########
+            #self._gameField.tryout(500, 500)
+            #########
 
-                self._start_node.set_coordinates(*first_step.get_coordinates())  # Update _start_node to new Coordinates
+            if not self._path_back_exists:
+                self._path_back_exists = self._get_path_back_existance()
+
+            if self._path_back_exists:
+                self._path_to_tail = None
+                self._decide_moving_direction(self._path)
             else:
-                print("No path BACK could be found")
-        else:
-            print("NO PATH COULD BE FOUND")
-            # TODO: What then
+                self._path = None
+                print("No path BACK could be found, search path to TAIL")
 
-    def _create_nodes(self):
-        playground = self._gameField.get_play_ground()
+                # if not self._path_to_tail:
+                #     self._path_to_tail = self._get_path_to_tail()
+                # if self._path_to_tail:
+                #     print('Path to TAIL found!')
+                #     print(self._path_to_tail)
+                #     self._decide_moving_direction(self._path_to_tail)
+                # else:
+                #     # TODO
+                #     print('I AM LOST!')
+                #     pass
+        else:
+            self._path_back_exists = None
+            print("NO PATH COULD BE FOUND, search path to TAIL")
+            # if not self._path_to_tail:
+            #     self._path_to_tail = self._get_path_to_tail()
+            # if self._path_to_tail:
+            #     print('Path to TAIL found!')
+            #     print(self._path_to_tail)
+            #     self._decide_moving_direction(self._path_to_tail)
+            # else:
+            #     # TODO
+            #     print('I AM LOST!')
+            #     pass
+
+    def _create_real_path_nodes(self):
+        playground = self._gameField.get_play_ground_positions()
         head_position = self._snake.get_head_position()
         tail_positions = self._snake.get_tail_positions()
         food_position = self._foodDispatcher.get_food_position()
@@ -227,7 +286,7 @@ class AI(object):
                 self._nodes.append(Node(coordinates[0], coordinates[1]))
 
     def _get_path(self, start_node, target_node, nodes):
-        # TODO: Prefere paths near the wall or the snake itself
+        # TODO: Prefer paths near the wall or the snake itself
         open_list = list()
         closed_list = list()
 
@@ -238,7 +297,7 @@ class AI(object):
         open_list.append(start_node)
 
         while open_list:
-            open_list.sort(key=lambda b: b.get_node_cost()) # TODO: Needed? / Use PriorityQueue
+            open_list.sort(key=lambda b: b.get_node_cost())  # TODO: Needed? / Use PriorityQueue
             current_node = open_list.pop(0)
             closed_list.append(current_node)
             if current_node.get_coordinates() == target_node.get_coordinates():
@@ -264,6 +323,8 @@ class AI(object):
                 if _next in open_list and _next.get_head_distance() >= current_node.get_food_distance():
                     continue
                 open_list.append(_next)
+        else:
+            return False
 
 
     def greedy_walk(self):

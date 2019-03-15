@@ -2,14 +2,30 @@
 import pygame
 import random
 from Settings import MOVE_STEP, BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
+import sys
 
 
 class GameField(object):
 
-    def __init__(self, snake):
+    def __init__(self, snake, screen):
         self._snake = snake
+        self._screen = screen
 
         self._food_position = None
+
+        self.clock = pygame.time.Clock()
+
+    def tryout(self, x, y):
+        print('ttttt')
+        pygame.draw.circle(self._screen, (153,50,204), (x, y), 100, 10)
+        self.clock.tick(500)
+        pygame.draw.circle(self._screen, (153,50,204), (x, y), 10, 5)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+        pygame.time.wait(500)
+        pygame.display.update()
+        pygame.time.wait(500)
 
     def get_game_field_block_size(self):
         return (WINDOW_SIZE[0] - (2*BLOCKSIZE)) // BLOCKSIZE, (WINDOW_SIZE[1] - (2*BLOCKSIZE))//BLOCKSIZE
@@ -17,10 +33,17 @@ class GameField(object):
     def update_food_position(self, pos):
         self._food_position = pos
 
-    def get_play_ground(self):
+    def get_play_ground_positions(self):
         play_ground = []
         for y in range(BORDER_SIZE, WINDOW_SIZE[1] - BORDER_SIZE, BLOCKSIZE):
             for x in range(BORDER_SIZE, WINDOW_SIZE[0] - BORDER_SIZE, BLOCKSIZE):
+                play_ground.append((x, y))
+        return play_ground
+
+    def get_playground_coordinates(self):
+        play_ground = []
+        for y in range(0, (WINDOW_SIZE[1] - 2*BORDER_SIZE)//BLOCKSIZE):
+            for x in range(0, (WINDOW_SIZE[1] - 2*BORDER_SIZE)//BLOCKSIZE):
                 play_ground.append((x, y))
         return play_ground
 
@@ -28,7 +51,7 @@ class GameField(object):
         snake_positions = self._snake.get_tail_positions()
         snake_positions.append(self._snake.get_head_position())
 
-        free_playground = self.get_play_ground()
+        free_playground = self.get_play_ground_positions()
         for snake_pos in snake_positions:
             try:
                 free_playground.remove(snake_pos)

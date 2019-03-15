@@ -11,10 +11,6 @@ class FoodDispatcher(object):
 
         self._food = None
 
-        self.place_food()
-        self.remove_food()
-        self.place_food()
-
     def place_food(self):
         free_space = self.gameField.get_free_space()
         if not self._food:

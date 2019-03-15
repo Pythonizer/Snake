@@ -34,7 +34,7 @@ class Game:
 
         self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, size=BLOCKSIZE)
 
-        self._gameField = GameField(self._snake)
+        self._gameField = GameField(self._snake, self._screen)
         self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
 
         self._ai = AI(self._snake, self._foodDispatcher, self._gameField)
@@ -111,6 +111,11 @@ class Game:
             self._snake.update_move_direction('down')
 
     def run_game(self):
+
+        self._foodDispatcher.place_food()
+        self._foodDispatcher.draw()
+        self._snake.draw(self._screen)
+
         while not self._quit:
             #self._clock.tick(FPS)
             self._clock.tick(15)
@@ -125,8 +130,6 @@ class Game:
                     if self._game_mode == 'player':
                         self._handle_player_action(event)
 
-            #self._update_snake()
-
             if self._game_mode == 'ai':
                 self._ai.think()
 
@@ -137,7 +140,7 @@ class Game:
                 if not self._quit:
                     del (self._snake)
                     self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
-                    self._gameField = GameField(self._snake)
+                    self._gameField = GameField(self._snake, self._screen)
                     self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
                     self._ai = AI(self._snake, self._foodDispatcher, self._gameField)
             else:
