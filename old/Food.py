@@ -1,6 +1,8 @@
-import pygame
-from Settings import APPLE_IMG, BANANA_IMG, BLOCKSIZE
 import random
+
+import pygame
+
+from old.Settings import APPLE_IMG, BANANA_IMG, BLOCKSIZE
 
 
 class Food(pygame.sprite.Sprite):

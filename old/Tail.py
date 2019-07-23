@@ -1,5 +1,6 @@
 import pygame
-from Settings import SNAKE_TAIL_IMG, SNAKE_TAIL_BEND_IMG, SNAKE_TAIL_END_IMG
+
+from old.Settings import SNAKE_TAIL_IMG, SNAKE_TAIL_BEND_IMG, SNAKE_TAIL_END_IMG
 
 
 class Tail(list):

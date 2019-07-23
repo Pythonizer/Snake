@@ -1,15 +1,12 @@
-import pygame
-
 from Head import Head
 from Tail import Tail
-import Colors
-from Settings import MOVE_STEP
+
+from old import Colors
 
 
 class Snake(object):
-    def __init__(self, pos_x, pos_y, size, color=Colors.GRASS_GREEN):
+    def __init__(self, pos_x, pos_y):
         super(Snake, self).__init__()
-        self._color = color
 
         self._position_x = pos_x
         self._position_y = pos_y

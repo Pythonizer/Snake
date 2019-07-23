@@ -1,13 +1,10 @@
 
-from Settings import BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
-
-from Searcher import Searcher
-
-from Node import Node
-
 from copy import deepcopy, copy
 
-from pprint import pprint
+from Searcher import Searcher
+from Settings import BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
+
+from old.Node import Node
 
 
 class AI(object):

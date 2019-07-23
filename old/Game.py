@@ -1,20 +1,18 @@
 
-import pygame
-from pygame import locals
-
-from GameOverMenu import GameOverMenu
-from StartMenu import StartMenu
-from Snake import Snake
-from FoodDispatcher import FoodDispatcher
-from AI import AI
-from GameField import GameField
-import Colors
 import sys
 from datetime import datetime
 
-
-from Settings import FPS, WINDOW_SIZE, FULLSCREEN, START_MENU_OPTIONS, GAME_OVER_MENU_OPTIONS, MOVE_STEP
+import pygame
+from AI import AI
+from FoodDispatcher import FoodDispatcher
+from GameField import GameField
+from GameOverMenu import GameOverMenu
 from Settings import BACKGORUND, BLOCKSIZE, HELP_CONTENT, BACKGROUND_IMG, BORDER_SIZE
+from Settings import WINDOW_SIZE, FULLSCREEN, START_MENU_OPTIONS, GAME_OVER_MENU_OPTIONS, MOVE_STEP
+from StartMenu import StartMenu
+from pygame import locals
+
+from old.Snake import Snake
 
 
 class Game:
@@ -32,7 +30,7 @@ class Game:
         self._game_mode = start_menu.run()
         self._game_over_menu = GameOverMenu(self._screen, GAME_OVER_MENU_OPTIONS)
 
-        self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, size=BLOCKSIZE)
+        self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2)
 
         self._gameField = GameField(self._snake, self._screen)
         self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
@@ -139,7 +137,7 @@ class Game:
                 self._quit = self._game_over_menu.run()
                 if not self._quit:
                     del (self._snake)
-                    self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2, BLOCKSIZE)
+                    self._snake = Snake(WINDOW_SIZE[0] / 2, WINDOW_SIZE[1] / 2)
                     self._gameField = GameField(self._snake, self._screen)
                     self._foodDispatcher = FoodDispatcher(self._screen, self._gameField)
                     self._ai = AI(self._snake, self._foodDispatcher, self._gameField)

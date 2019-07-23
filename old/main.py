@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Game import Game
+from old.Game import Game
 
 
 if __name__ == '__main__':

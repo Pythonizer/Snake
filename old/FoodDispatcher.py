@@ -1,6 +1,5 @@
-import pygame
 import random
-from Settings import MOVE_STEP, BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
+
 from Food import Food
 
 

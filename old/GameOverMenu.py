@@ -1,10 +1,9 @@
+import sys
+
 import pygame
 from pygame import locals
 
-import sys
-import subprocess
-
-from GameMenu import GameMenu
+from old.GameMenu import GameMenu
 
 
 class GameOverMenu(GameMenu):

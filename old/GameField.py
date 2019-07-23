@@ -1,8 +1,9 @@
 
-import pygame
-import random
-from Settings import MOVE_STEP, BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
 import sys
+
+import pygame
+
+from old.Settings import BLOCKSIZE, BORDER_SIZE, WINDOW_SIZE
 
 
 class GameField(object):

@@ -1,4 +1,4 @@
-import Colors
+from old import Colors
 
 HELP_CONTENT = 'HELP-MENU\n' \
                '----------\n' \

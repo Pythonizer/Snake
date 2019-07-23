@@ -1,5 +1,6 @@
 import pygame
-from Settings import SNAKE_HEAD_IMG
+
+from old.Settings import SNAKE_HEAD_IMG
 
 
 class Head(pygame.sprite.Sprite):

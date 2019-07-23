@@ -1,9 +1,6 @@
 import pygame
-from pygame import locals
 
-import sys
-import subprocess
-from Settings import FONT_1
+from old.Settings import FONT_1
 
 
 class GameMenu(object):
