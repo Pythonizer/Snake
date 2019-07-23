@@ -11,7 +11,7 @@ class GameField{
     + get_playground_coordinates()
     + get_free_space()
     + map_pixels_to_coordinates()
-    + map_coordinates_to_pixles
+    + map_coordinates_to_pixles()
 }
 
 class Snake{
@@ -145,6 +145,12 @@ AI -- GameField
 
 AI *-right- Searcher
 AI "1" *-left- "n" Node
+
+
+Searcher -down- GameField
+Searcher -down- Snake
+Searcher -down- FoodDispatcher
+
 
 
 @enduml
