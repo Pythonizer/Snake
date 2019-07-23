@@ -10,7 +10,6 @@ class Snake(object):
     def __init__(self, pos_x, pos_y, size, color=Colors.GRASS_GREEN):
         super(Snake, self).__init__()
         self._color = color
-        self._size = size
 
         self._position_x = pos_x
         self._position_y = pos_y
@@ -19,6 +18,8 @@ class Snake(object):
         self._head = Head(pos_x=self._position_x, pos_y=self._position_y)
         self._tail = Tail()
         self._length = 0
+
+        self._last_moved_tail_pos = None
 
         # Start with tail length of 1?
         #self.eat()
@@ -63,9 +64,11 @@ class Snake(object):
 
     def eat(self):
         self._length += 1
+        #print(self._last_moved_tail_pos)
 
     def _update_tail(self):
         self._tail.add_tail_segment(self._position_x, self._position_y, self._move_direction)
         if self._length < len(self._tail):
+            self._last_moved_tail_pos = self._tail[0][0], self._tail[0][1]  # TODO: last moved snake position
             del self._tail[0]
 

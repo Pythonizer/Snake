@@ -9,8 +9,6 @@ from copy import deepcopy, copy
 
 from pprint import pprint
 
-import pygame
-
 
 class AI(object):
     def __init__(self, snake, food_dispatcher, gameField):
@@ -28,7 +26,137 @@ class AI(object):
         self._target_node = None
         self._nodes = None
 
-    def _get_path_back_existance(self):
+    def think(self):
+
+        if not self._path:
+            self._create_real_path_nodes()
+            self._path = self._get_path(self._start_node, self._target_node, self._nodes)
+            self._path_back_exists = None
+
+        if self._path:
+            if not self._path_back_exists:
+                self._path_back_exists = self._get_path_back_existence()
+
+            if self._path_back_exists:
+                self._path_to_tail = None
+                self._decide_moving_direction(self._path)
+            else:
+                self._path = None
+                print("No path BACK could be found, search path to TAIL")
+
+                if not self._path_to_tail:
+                    self._path_to_tail = self._get_path_to_tail()
+                if self._path_to_tail:
+                    print('Path to TAIL found!')
+                    print(self._path_to_tail)
+                    # TODO: May run into last tail bit, if the len(path-to-tail) is just one and a fruit just gets eaten!
+                    self._decide_moving_direction(self._path_to_tail)
+                else:
+                    # This should never be possible!
+                    print('I AM LOST!')
+        else:
+            self._path_back_exists = None
+            print("NO PATH COULD BE FOUND, search path to TAIL")
+            if not self._path_to_tail:
+                self._path_to_tail = self._get_path_to_tail()
+            if self._path_to_tail:
+                print('Path to TAIL found!')
+                print(self._path_to_tail)
+                # TODO: May run into last tail bit, if the len(path-to-tail) is just one and a fruit just gets eaten!
+                self._decide_moving_direction(self._path_to_tail)
+            else:
+                # This should never be possible
+                print('I AM LOST!')
+
+    def _decide_moving_direction(self, path_to_follow):
+        first_step = path_to_follow.pop(0)
+        if first_step.get_coordinates()[0] == self._start_node.get_coordinates()[0]:
+            if first_step.get_coordinates()[1] > self._start_node.get_coordinates()[1]:
+                self._snake.update_move_direction('down')
+            else:
+                self._snake.update_move_direction('up')
+        else:
+            if first_step.get_coordinates()[0] > self._start_node.get_coordinates()[0]:
+                self._snake.update_move_direction('right')
+            else:
+                self._snake.update_move_direction('left')
+
+        self._start_node.set_coordinates(*first_step.get_coordinates())  # Update _start_node to new Coordinates
+
+    def _create_real_path_nodes(self):
+        playground = self._gameField.get_play_ground_positions()
+        head_position = self._snake.get_head_position()
+        tail_positions = self._snake.get_tail_positions()
+        food_position = self._foodDispatcher.get_food_position()
+
+        self._start_node = None
+        self._target_node = None
+        self._nodes = []
+
+        for pos in playground:
+            coordinates = self._gameField.map_pixels_to_coordinates(pos)
+            if pos == head_position:
+                self._start_node = Node(coordinates[0], coordinates[1], node_type="start_node")
+                self._nodes.append(self._start_node)
+            elif pos in tail_positions:
+                node = Node(coordinates[0], coordinates[1], node_type="blocking_node")
+                self._nodes.append(node)
+            elif pos == food_position:
+                self._target_node = Node(coordinates[0], coordinates[1], node_type="target_node")
+                self._nodes.append(self._target_node)
+            else:
+                self._nodes.append(Node(coordinates[0], coordinates[1]))
+
+    def _get_path(self, start_node, target_node, nodes):
+        # TODO: Prefer paths near the wall or the snake itself
+
+        open_list = list()
+        closed_list = list()
+
+        start_node.set_parent(None)
+
+        start_node.set_start_distance(0)
+        start_node.set_node_cost(0)
+        open_list.append(start_node)
+
+        while open_list:
+            open_list.sort(key=lambda b: b.get_node_cost())
+            #open_list.sort(key=lambda b: b.get_location_weighted_cost())
+            current_node = open_list.pop(0)
+            closed_list.append(current_node)
+            if current_node.get_coordinates() == target_node.get_coordinates():
+                path = []
+                current = current_node
+                while current is not None:
+                    path.append(current)
+                    current = current.get_parent()
+
+                path = path[::-1]
+                path.pop(0)
+                return path
+
+            for _next in self.searcher.get_neighbors(current_node, nodes):
+                if _next in closed_list:
+                    continue
+                _next.set_parent(current_node)
+
+                _next.set_start_distance(current_node.get_start_distance() + 10)
+                _next.set_target_distance(self.searcher.get_heuristic_food_distance(_next))
+                _next.set_node_cost(_next.get_start_distance() + _next.get_target_distance())
+
+                if _next in open_list and _next.get_start_distance() >= current_node.get_start_distance():
+                    continue
+                # if _next in open_list:
+                #     if _next.get_start_distance() > current_node.get_start_distance():
+                #         continue
+                #     elif _next.get_start_distance() == current_node.get_start_distance() and\
+                #                     _next.get_location_weighted_cost() > current_node.get_location_weighted_cost():
+                #         continue
+                open_list.append(_next)
+        else:
+            return False
+
+    def _get_path_back_existence(self):
         """
 
         self._snake.get_tail_positions() (example)
@@ -138,48 +266,22 @@ class AI(object):
 
         virtual_path_back = self._get_path(virtual_start_node, virtual_target_node, virtual_nodes)
 
-        # Used to assert node results
-        if False:
-            if not len(virtual_nodes) == 400:
-                raise RuntimeError("len(virtual_nodes != 400, %s" % len(virtual_nodes))
-            c_s = 0
-            c_t = 0
-            c_b = 0
-            for n in virtual_nodes:
-                if n.get_node_type() == 'target_node':
-                    c_t += 1
-                elif n.get_node_type() == 'start_node':
-                    c_s += 1
-                elif n.get_node_type() == 'blocking_node':
-                    c_b += 1
-            if c_s != 1:
-                print(virtual_start_node)
-                print(virtual_target_node)
-                pprint(virtual_nodes)
-                raise RuntimeError("VStart node != 1, %s" % c_s)
-            if c_t != 1:
-                raise RuntimeError("VTarget node != 1, %s" % c_t)
-            if c_b != len(virtual_blocking_coordinates):
-                pprint(virtual_blocking_coordinates)
-                pprint(virtual_nodes)
-                raise RuntimeError("Blocking nodes %s != %s" % (len(virtual_blocking_coordinates), c_b))
-
-            print('\n')
-            print('VStart: %s' % virtual_start_node)
-            print('VTarget: %s' % virtual_target_node)
-            print('VBlocking:')
-            pprint(virtual_blocking_coordinates)
-
         return True if virtual_path_back else False
 
     def _get_path_to_tail(self):
         playground_coordinates = self._gameField.get_playground_coordinates()
         head_coordinate = self._gameField.map_pixels_to_coordinates(self._snake.get_head_position())
         tail_coordinates = list(map(lambda pos: self._gameField.map_pixels_to_coordinates(pos), self._snake.get_tail_positions()))
-        print("Tail-Coordinates: %s" % tail_coordinates)
-        last_tail_coordinate = tail_coordinates.pop(0)
-        print('Head: %s' % str(head_coordinate))
-        print("Target_tail: %s" % str(last_tail_coordinate))
+
+        last_moved_tail_coordinate = self._gameField.map_pixels_to_coordinates(self._snake._last_moved_tail_pos)  # TODO: tryout!
+        target_coordinate_to_follow = last_moved_tail_coordinate
+        # If the distance from head to tail is just one and gets reduced through the "eating",
+        # there is no space left anymore. Therefore the last_moved_tail has the same coordinates as the head.
+        # Set the target to the effective last tail in this scenario.
+        # This is not 100% Fault proofed but works fine until a better solution has been determined.
+        if last_moved_tail_coordinate == head_coordinate:
+            last_tail_coordinate = tail_coordinates.pop(0)
+            target_coordinate_to_follow = last_tail_coordinate
 
         self._start_node = None
         target_tail_node = None
@@ -192,140 +294,13 @@ class AI(object):
             elif coordinates in tail_coordinates:
                 node = Node(coordinates[0], coordinates[1], node_type="blocking_node")
                 path_to_tail_nodes.append(node)
-            elif coordinates == last_tail_coordinate:
+            elif coordinates == target_coordinate_to_follow:
                 target_tail_node = Node(coordinates[0], coordinates[1], node_type="target_node")
                 path_to_tail_nodes.append(target_tail_node)
             else:
                 path_to_tail_nodes.append(Node(coordinates[0], coordinates[1]))
+
         return self._get_path(self._start_node, target_tail_node, path_to_tail_nodes)
-
-    def _decide_moving_direction(self, path_to_follow):
-        first_step = path_to_follow.pop(0)
-        if first_step.get_coordinates()[0] == self._start_node.get_coordinates()[0]:
-            if first_step.get_coordinates()[1] > self._start_node.get_coordinates()[1]:
-                self._snake.update_move_direction('down')
-            else:
-                self._snake.update_move_direction('up')
-        else:
-            if first_step.get_coordinates()[0] > self._start_node.get_coordinates()[0]:
-                self._snake.update_move_direction('right')
-            else:
-                self._snake.update_move_direction('left')
-
-        self._start_node.set_coordinates(*first_step.get_coordinates())  # Update _start_node to new Coordinates
-
-    def think(self):
-
-        if not self._path:
-            self._create_real_path_nodes()
-            self._path = self._get_path(self._start_node, self._target_node, self._nodes)
-            self._path_back_exists = None
-
-        if self._path:
-
-            #########
-            #self._gameField.tryout(500, 500)
-            #########
-
-            if not self._path_back_exists:
-                self._path_back_exists = self._get_path_back_existance()
-
-            if self._path_back_exists:
-                self._path_to_tail = None
-                self._decide_moving_direction(self._path)
-            else:
-                self._path = None
-                print("No path BACK could be found, search path to TAIL")
-
-                # if not self._path_to_tail:
-                #     self._path_to_tail = self._get_path_to_tail()
-                # if self._path_to_tail:
-                #     print('Path to TAIL found!')
-                #     print(self._path_to_tail)
-                #     self._decide_moving_direction(self._path_to_tail)
-                # else:
-                #     # TODO
-                #     print('I AM LOST!')
-                #     pass
-        else:
-            self._path_back_exists = None
-            print("NO PATH COULD BE FOUND, search path to TAIL")
-            # if not self._path_to_tail:
-            #     self._path_to_tail = self._get_path_to_tail()
-            # if self._path_to_tail:
-            #     print('Path to TAIL found!')
-            #     print(self._path_to_tail)
-            #     self._decide_moving_direction(self._path_to_tail)
-            # else:
-            #     # TODO
-            #     print('I AM LOST!')
-            #     pass
-
-    def _create_real_path_nodes(self):
-        playground = self._gameField.get_play_ground_positions()
-        head_position = self._snake.get_head_position()
-        tail_positions = self._snake.get_tail_positions()
-        food_position = self._foodDispatcher.get_food_position()
-
-        self._start_node = None
-        self._target_node = None
-        self._nodes = []
-
-        for pos in playground:
-            coordinates = self._gameField.map_pixels_to_coordinates(pos)
-            if pos == head_position:
-                self._start_node = Node(coordinates[0], coordinates[1], node_type="start_node")
-                self._nodes.append(self._start_node)
-            elif pos in tail_positions:
-                node = Node(coordinates[0], coordinates[1], node_type="blocking_node")
-                self._nodes.append(node)
-            elif pos == food_position:
-                self._target_node = Node(coordinates[0], coordinates[1], node_type="target_node")
-                self._nodes.append(self._target_node)
-            else:
-                self._nodes.append(Node(coordinates[0], coordinates[1]))
-
-    def _get_path(self, start_node, target_node, nodes):
-        # TODO: Prefer paths near the wall or the snake itself
-        open_list = list()
-        closed_list = list()
-
-        start_node.set_parent(None)
-
-        start_node.set_head_distance(0)
-        start_node.set_node_cost(0)
-        open_list.append(start_node)
-
-        while open_list:
-            open_list.sort(key=lambda b: b.get_node_cost())  # TODO: Needed? / Use PriorityQueue
-            current_node = open_list.pop(0)
-            closed_list.append(current_node)
-            if current_node.get_coordinates() == target_node.get_coordinates():
-                path = []
-                current = current_node
-                while current is not None:
-                    path.append(current)
-                    current = current.get_parent()
-
-                path = path[::-1]
-                path.pop(0)
-                return path
-
-            for _next in self.searcher.get_neighbors(current_node, nodes):
-                if _next in closed_list:
-                    continue
-                _next.set_parent(current_node)
-
-                _next.set_head_distance(current_node.get_head_distance() + 10)
-                _next.set_food_distance(self.searcher.get_heuristic_food_distance(_next))
-                _next.set_node_cost(_next.get_head_distance() + _next.get_food_distance())
-
-                if _next in open_list and _next.get_head_distance() >= current_node.get_food_distance():
-                    continue
-                open_list.append(_next)
-        else:
-            return False
-
 
     def greedy_walk(self):
         food_pos = self._foodDispatcher.get_food_position()

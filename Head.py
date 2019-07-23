@@ -11,8 +11,6 @@ class Head(pygame.sprite.Sprite):
         self._pos_x = pos_x
         self._pos_y = pos_y
 
-        self._parent = None
-
     def update_x_position(self, pos):
         self._pos_x = pos
 
