@@ -1,0 +1,150 @@
+@startuml
+
+class GameField{
+    - snake
+    - screen
+    - food_position
+
+    + get_game_field_block_size()
+    + update_food_position()
+    + get_play_ground_positions()
+    + get_playground_coordinates()
+    + get_free_space()
+    + map_pixels_to_coordinates()
+    + map_coordinates_to_pixles
+}
+
+class Snake{
+    - position_x
+    - position_y
+    - move_direction
+    - head
+    - tail
+    - length
+    - last_moved_tail_pos
+
+    + get_head()
+    + get_head_position()
+    + get_tail_positions()
+    + update_move_direction()
+    + get_move_direction()
+    + move()
+    + eat()
+    + draw()
+    - _update_tail()
+}
+
+class Head{
+    - x_pos
+    - y_pos
+    + update_x()
+    + update_y()
+    + get_x()
+    + get_y()
+    + get_pos()
+    + draw()
+}
+
+class Tail{
+    - last_direction
+    + add_tail_segment()
+    + draw()
+}
+
+class Food{
+    - pos_x
+    - pos_y
+
+    + update_x_position()
+    + update_y_position()
+    + get_pos_x()
+    + get_pos_y()
+    + get_size()
+    + draw()
+}
+
+class FoodDispatcher{
+    + screen
+    + game_field
+    - food
+
+    + place_food()
+    + remove_food()
+    + get_food_position()
+    + get_food_coordinates()
+    + get_food_size()
+    + draw()
+}
+
+class AI{
+    - snake
+    - food_dispatcher
+    - game_field
+    - last_move_direction
+    - searcher
+    - path
+    - nodes
+    - path and node variables
+    + think()
+    - _decide_moving_direction()
+    - _create_real_path_nodes()
+    - _get_path()
+    - _get_path_back_existence()
+    - _get_path_to_tail()
+    - get_walls()
+
+}
+
+class Searcher{
+    - game_field
+    - snake
+    - food_dispatcher
+    - frontier
+
+    + get_heuristic_food_distance()
+    + get_neighbors()
+    - _get_neighbor_coordinates()
+    - _get_valid_neighbors()
+}
+
+class Node{
+    - coordinate_x
+    - coordinate_y
+    - node_type
+    - dist_start
+    - dist_target
+    - node_cost
+    - node_location
+    - parent
+
+    + set_coordinates()
+    + get_coordinates()
+    + set_start_distance()
+    + get_start_distance()
+    + set_target_distance()
+    + get_target_distance()
+    + set_node_cost()
+    + get_location_weighted_cost()
+    + set_parent()
+    + get_parent()
+    + set_node_type()
+    + get_node_type()
+}
+
+Snake "1" *-- "1" Head
+Snake "1" *-- "1" Tail
+Tail -up-|> List
+FoodDispatcher "1" *-- "1" Food
+
+AI -- Snake
+AI -- FoodDispatcher
+
+FoodDispatcher -- GameField
+Snake -- GameField
+AI -- GameField
+
+AI *-right- Searcher
+AI "1" *-left- "n" Node
+
+
+@enduml
